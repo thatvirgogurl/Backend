@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     age: Number,
     gender: {
         type: String,
-        enum: ["male", "female", "LGBTQ"] //"falana" will give an error
+        enum: ["male", "female", "LGBTQ"] //other will give an error
     },
     isFreeAppUser:{
         type:Boolean,

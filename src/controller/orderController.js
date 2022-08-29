@@ -4,6 +4,7 @@ const orderModel = require("../models/orderModel")
 const CreateOrder = async function (req, res) {
     let headerData = req.headers["isfreeappuser"]
     let orderData = req.body;
+    
     let productData = await productModel.findById(orderData.productId)
     let userData = await userModel.findById(orderData.userId)
 
