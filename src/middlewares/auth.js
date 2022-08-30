@@ -1,8 +1,8 @@
 const jwt = require("jsonwebtoken");
 
 const validateToken = function(req, res, next) {
-    let token = req.headers["x-Auth-token"];
-    if (!token) token = req.headers["x-auth-token"];
+    let token = req.headers["x-auth-token"];
+    //if (!token) token = req.headers["x-auth-token"];
   
     //If no token is present in the request header return error
     if (!token) return res.send({ status: false, msg: "token must be present" });
@@ -18,7 +18,17 @@ const validateToken = function(req, res, next) {
     if (!decodedToken) {
       return res.send({ status: false, msg: "token is invalid" });
     }
+  req.loggedInUserId = decodedToken.userId
     next()
 }
-
+const checkforAuthorization=function(req,res,next)
+{
+  let requireId = req.params.userId
+  if(requireId!==req.loggedInUserId)
+  {
+    return res.send({msg:false,msg:"permission denied"})
+  }
+  next()
+}
 module.exports.validateToken = validateToken
+module.exports.checkforAuthorization=checkforAuthorization
