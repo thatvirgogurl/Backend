@@ -1,32 +1,38 @@
+const { response } = require("express");
 const jwt = require("jsonwebtoken");
 
 const validateToken = function(req, res, next) {
+  try{
     let token = req.headers["x-auth-token"];
     //if (!token) token = req.headers["x-auth-token"];
   
     //If no token is present in the request header return error
-    if (!token) return res.send({ status: false, msg: "token must be present" });
+    if (!token) return res.status(403).send({ status: false, msg: "token must be present" });
   
     console.log(token);
-    
-    // If a token is present then decode the token with verify function
-    // verify takes two inputs:
-    // Input 1 is the token to be decoded
-    // Input 2 is the same secret with which the token was generated
-    // Check the value of the decoded token yourself
+  
     let decodedToken = jwt.verify(token, "functionup-plutonium-very-very-secret-key");
     if (!decodedToken) {
-      return res.send({ status: false, msg: "token is invalid" });
+      return res.status(403).send({ status: false, msg: "token is invalid" });
     }
   req.loggedInUserId = decodedToken.userId
+}
+  catch(err) {
+    res.status(400).send({ "error 400": err.message });
+  }
     next()
 }
 const checkforAuthorization=function(req,res,next)
 {
+  try{
   let requireId = req.params.userId
   if(requireId!==req.loggedInUserId)
   {
-    return res.send({msg:false,msg:"permission denied"})
+    return res.status(401).send({msg:false,msg:"permission denied"})
+  }
+}
+catch(err) {
+    res.status(400).send({ "error 400": err.message });
   }
   next()
 }
