@@ -6,7 +6,7 @@ const internModel = require("../models/internModel");
 
 const isValidName = function(body) {
     const nameRegex = /^[a-zA-Z_ ]*$/
-
+    
     return nameRegex.test(body)
 }
 
@@ -16,42 +16,43 @@ const isValidEmail = function(email){
 }
 const isValidMobileNo = function(mobile){
   return /^[6-9]\d{9}$/.test(mobile);
-
+  
 }
 
 
 
 
 
+////////////////////////////////////////////////////    College Validation      ////////////////////////////////////////////////////////////////////////
 
 
 const collegeValidation = async function(req, res, next){
-    let collegeDetails = req.body;
-    let {name, fullName, logoLink} = {...collegeDetails}
-
-    if (!name ) {
-        return res
-        .status(400)
+  let collegeDetails = req.body;
+  let {name, fullName, logoLink} = {...collegeDetails}
+  
+  if (!name ) {
+    return res
+    .status(400)
         .send({ status: false, msg: "name is required" });
-    }
-
-    if (!fullName ) {
+      }
+      
+      if (!fullName ) {
         return res
         .status(400)
         .send({ status: false, msg: "fullName is required" });
-    }
-    if ( !logoLink ) {
+      }
+      if ( !logoLink ) {
         return res
         .status(400)
         .send({ status: false, msg: "logoLink is required" });
-    }
-    
+      }
+      
     let [Name, FullName, LogoLink ] = [ isValidName(name), isValidName(fullName), isValidName(logoLink)];
     
     const isNameAlreadyUsed = await collegeModels.findOne({ name }); 
-
+    
     if ( isNameAlreadyUsed ) {
-        return res.status(400).send({ status: false, message: "name already exist" });
+      return res.status(400).send({ status: false, message: "name already exist" });
     }
 
     if (!Name ) {
@@ -65,19 +66,25 @@ const collegeValidation = async function(req, res, next){
     if ( !LogoLink  ) {
       return res.status(400).send({ status: false, message: "Enter valid logoLink" });
     }
-
+    
 
 
     next()
 }
 
+
+
+////////////////////////////////////////////////////    Intern Validation      ////////////////////////////////////////////////////////////////////////
+
+
+
 const internValidation = async function(req, res, next){
     let internDetails = req.body;
     let {name, mobile, email, collegeName} = {...internDetails}
-
+    
     if (!name ) {
-        return res
-        .status(400)
+      return res
+      .status(400)
         .send({ status: false, msg: "name is required" });
     }
 
@@ -136,22 +143,3 @@ const internValidation = async function(req, res, next){
 }
 
 module.exports = {collegeValidation, internValidation}
-
-
-// name: {
-//     type: String,
-//     required: true,
-//     unique: true
-// }, 
-// fullName: {
-//     type: String,
-//     required: true
-// },
-//  logoLink: {
-//     type: String,
-//     required: true
-//  },
-//   isDeleted: {
-//     type: Boolean,
-//     default: false
-//   }
