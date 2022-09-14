@@ -1,5 +1,7 @@
 const collegeModel = require("../models/collegeModels")
 const internModel = require("../models/internModel")
+const mongoose = require("mongoose")
+
 
 
 const createIntern = async function(req,res){
@@ -33,22 +35,30 @@ const createIntern = async function(req,res){
 
 const getcollegeIntern = async function (req, res) {
     try {
-        const queries = req.query.name;
+        const collegeName = req.query.name;
     
-        let collegeDetails = await collegeModel.findOne({ name: queries, isDeleted: false })
-
+        let collegeDetails = await collegeModel.findOne({ name: collegeName, isDeleted: false })
+        if (!collegeDetails) {
+            return res.status(404).send({ status: "false", msg: "College not exist" })
+        }
+        
         let objectOfCollegeDetails = collegeDetails.toObject()
 
+        if (!objectOfCollegeDetails) {
+            return res.status(404).send({ status: "false", msg: "objectOfCollegeDetails is not object type" })
+        }
+        
         let {name, fullName, logoLink} = {...objectOfCollegeDetails}
-
+        
         let internDetails=await internModel.find({collegeId: collegeDetails._id,isDeleted:false}).select({name:1,email:1,mobile:1})
+        if (!internDetails[0]) {
+            return res.status(404).send({ status: "false", msg: "No intern found" })
+        }
 
         let internsOf_a_College = {name, fullName, logoLink, intern: internDetails}
-            
-        if (collegeDetails.length == 0) {
-            return res.status(404).send({ status: "false", msg: "Sorry,Data not Found." })
-        }
+
         return res.status(200).send({ data : internsOf_a_College })
+    
     } catch (error) {
         return res.status(500).send({ msg: error.message })
     }
