@@ -29,4 +29,29 @@ const createIntern = async function(req,res){
 
 }
 
-module.exports = {createIntern}
+
+
+const getcollegeIntern = async function (req, res) {
+    try {
+        const queries = req.query.name;
+    
+        let collegeDetails = await collegeModel.findOne({ name: queries })
+
+        let objectOfCollegeDetails = collegeDetails.toObject()
+
+        let {name, fullName, logoLink} = {...objectOfCollegeDetails}
+
+        let internDetails=await internModel.find({collegeId: collegeDetails._id}).select({name:1,email:1,mobile:1})
+
+        let internsOf_a_College = {name, fullName, logoLink, intern: internDetails}
+            
+        if (collegeDetails.length == 0) {
+            return res.status(404).send({ status: "false", msg: "Sorry,Data not Found." })
+        }
+        return res.status(200).send({ data : internsOf_a_College })
+    } catch (error) {
+        return res.status(500).send({ msg: error.message })
+    }
+}
+
+module.exports = {createIntern, getcollegeIntern}
