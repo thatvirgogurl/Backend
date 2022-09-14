@@ -8,8 +8,8 @@ const createIntern = async function(req,res){
         let {name, mobile, email} = {...reqData}
         let Name = req.body.collegeName
         
-        let data = await collegeModel.findOne({ Name})
-        if (Object.keys(data) == 0 || !data._id) {
+        let data = await collegeModel.findOne({name: Name})
+        if ( !data ) {
             return res
             .status(400)
             .send({ status: false, msg: "College not exist" });
