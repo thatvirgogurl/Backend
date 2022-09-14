@@ -52,7 +52,7 @@ const getcollegeIntern = async function (req, res) {
         
         let internDetails=await internModel.find({collegeId: collegeDetails._id,isDeleted:false}).select({name:1,email:1,mobile:1})
         if (!internDetails[0]) {
-            return res.status(404).send({ status: "false", msg: "No intern found" })
+            return res.status(404).send({ status: "false", msg: "No intern applied for this college" })
         }
 
         let internsOf_a_College = {name, fullName, logoLink, intern: internDetails}
