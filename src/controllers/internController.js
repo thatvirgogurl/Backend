@@ -35,13 +35,13 @@ const getcollegeIntern = async function (req, res) {
     try {
         const queries = req.query.name;
     
-        let collegeDetails = await collegeModel.findOne({ name: queries })
+        let collegeDetails = await collegeModel.findOne({ name: queries, isDeleted: false })
 
         let objectOfCollegeDetails = collegeDetails.toObject()
 
         let {name, fullName, logoLink} = {...objectOfCollegeDetails}
 
-        let internDetails=await internModel.find({collegeId: collegeDetails._id}).select({name:1,email:1,mobile:1})
+        let internDetails=await internModel.find({collegeId: collegeDetails._id,isDeleted:false}).select({name:1,email:1,mobile:1})
 
         let internsOf_a_College = {name, fullName, logoLink, intern: internDetails}
             
