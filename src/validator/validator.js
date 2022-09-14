@@ -9,6 +9,11 @@ const isValidName = function(body) {
     
     return nameRegex.test(body)
 }
+const isValidLogoLink = function(body) {
+    const nameRegex = /^[a-zA-Z0-9!@#$&()`.:+,/"-]*$/
+    
+    return nameRegex.test(body)
+}
 
 const isValidEmail = function(email){
   return /^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(email);
@@ -47,7 +52,7 @@ const collegeValidation = async function(req, res, next){
         .send({ status: false, msg: "logoLink is required" });
       }
       
-    let [Name, FullName, LogoLink ] = [ isValidName(name), isValidName(fullName), isValidName(logoLink)];
+    let [Name, FullName, LogoLink ] = [ isValidName(name), isValidName(fullName), isValidLogoLink(logoLink)];
     
     const isNameAlreadyUsed = await collegeModels.findOne({ name }); 
     
