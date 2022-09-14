@@ -10,7 +10,7 @@ const isValidName = function(body) {
     return nameRegex.test(body)
 }
 const isValidLogoLink = function(body) {
-    const nameRegex = /^[a-zA-Z0-9!@#$&()`.:+,/"-]*$/
+    const nameRegex = /^[a-zA-Z0-9!@#$&()`.:?=_+,/"-]*$/
     
     return nameRegex.test(body)
 }
