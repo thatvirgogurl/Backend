@@ -18,7 +18,7 @@ app.use('/', route);
 
 app.use((req, res, next) => {
     const error = new Error('/ Path not found /');
-    return res.status(404).send({status: 'ERROR', error: error.message})
+    return res.status(400).send({status: 'ERROR', error: error.message})
 });
 
 
