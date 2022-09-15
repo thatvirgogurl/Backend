@@ -16,6 +16,11 @@ mongoose.connect("mongodb+srv://abhi03:UQkqPECmlouMcNjb@cluster1.kwsn7az.mongodb
 
 app.use('/', route);
 
+app.use((req, res, next) => {
+    const error = new Error('/ Path not found /');
+    return res.status(404).send({status: 'ERROR', error: error.message})
+});
+
 
 app.listen(process.env.PORT || 3000, function () {
     console.log('Express app running on port ' + (process.env.PORT || 3000))

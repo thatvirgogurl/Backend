@@ -1,7 +1,6 @@
 const collegeModels = require("../models/collegeModels");
 const internModel = require("../models/internModel");
 
-
 ////////////////////////////////////////////////////    Function for Validation      ////////////////////////////////////////////////////////////////////////
 
 const isValidName = function (body) {
@@ -28,12 +27,10 @@ const collegeValidation = async function (req, res, next) {
   let collegeDetails = req.body;
   let { name, fullName, logoLink, ...rest } = { ...collegeDetails };
   if (Object.keys(rest) != 0)
-    return res
-      .status(404)
-      .send({
-        status: false,
-        msg: "Please provide required details only => name, fullName & logoLink",
-      });
+    return res.status(404).send({
+      status: false,
+      msg: "Please provide required details only => name, fullName & logoLink",
+    });
   if (Object.keys(collegeDetails) == 0)
     return res
       .status(404)
@@ -71,7 +68,7 @@ const collegeValidation = async function (req, res, next) {
   if (!FullName) {
     return res
       .status(400)
-      .send({ status: false, message: "Enter valid firstname" });
+      .send({ status: false, message: "Enter valid fullname" });
   }
 
   if (!LogoLink) {
@@ -90,12 +87,10 @@ const internValidation = async function (req, res, next) {
   let { name, mobile, email, collegeName, ...rest } = { ...internDetails };
 
   if (Object.keys(rest) != 0)
-    return res
-      .status(404)
-      .send({
-        status: false,
-        msg: "Please provide required details only => name, mobile, email & collegeName",
-      });
+    return res.status(404).send({
+      status: false,
+      msg: "Please provide required details only => name, mobile, email & collegeName",
+    });
   if (Object.keys(internDetails) == 0)
     return res
       .status(404)
@@ -131,7 +126,7 @@ const internValidation = async function (req, res, next) {
   if (!Mobile) {
     return res
       .status(400)
-      .send({ status: false, message: "Enter valid Mobile Number" });
+      .send({ status: false, message: "Enter valid mobile Number" });
   }
 
   const isMobileAlreadyUsed = await internModel.findOne({ mobile });
