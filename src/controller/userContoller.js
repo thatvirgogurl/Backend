@@ -1,6 +1,6 @@
 const { name } = require("nodeman/lib/mustache");
 const usermodel = require("../model/usermodel")
-
+passwordregex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{15,}$/
 
 const ValidString = function(data){
 if(typeof data!= "string"|| data.trim().length==0 ){
@@ -19,6 +19,11 @@ const CreateUser = async function(req,res){
     if(!isValidString(req.body[data]))
     return res.status(400).send({status:false , msg :`${data} is invalid`})
  }
+if(!passwordregex.test(req.body)){
+    res.status(400).send({status : false , msg : "password is invalid : minlen is 8 and maxLen is 15"})
+
+}
+
 
  let savedata = await usermodel.create(data)
  res.status(201).send({status : true ,  message: Success , data : savedata })
