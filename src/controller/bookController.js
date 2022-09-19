@@ -1,5 +1,6 @@
 const bookModel = require("../../models/bookmodel");
 const userModel = require("../models/usermodel")
+const moment = require("moment")
 const {isValidRequestBody,isValid,isValidRegex1,isValidRegex2,isValidObjectId} = require("../validator/validator")
 
 
@@ -13,7 +14,7 @@ const createBooks = async function (req, res) {
 
         // destructuring parameter of request body 
 
-        const { title, excerpt, userId, ISBN, category, subcategory, releasedAt, reviews, } = requestBody
+        const { title, excerpt, userId, ISBN, category, subcategory,reviews, } = requestBody
 
         //----------------------------- Start Validation ----------------------------------------------
 
@@ -40,9 +41,6 @@ const createBooks = async function (req, res) {
             if (!/^[0-9]$/.test(reviews)) return res.status(400).send({ status: false, msg: "Invalid review format" })
         }
 
-        if (!releasedAt) return res.status(400).send({ status: false, msg: "relesedAt is required" })
-        if ((typeof releasedAt !== Date)) return res.status(400).send({ status: false, msg: "released at must be Date" })
-
         const isUniqueTitle = await bookModel.findOne({ title: title })
         if (isUniqueTitle) return res.status(409).send({ status: false, msg: "Title is already Exist" })
 
@@ -52,7 +50,7 @@ const createBooks = async function (req, res) {
         const isUniqueISBN = await bookModel.findOne({ ISBN: ISBN })
         if (isUniqueISBN) return res.status(409).send({ status: false, msg: "ISBN number is already exist" })
 
-        const data = { title, excerpt, userId, ISBN, category, subcategory, releasedAt, reviews }
+        const data = { title, excerpt, userId, ISBN, category, subcategory, releasedAt :moment().format("DD/MM/YYYY , h:mm:ss a"), reviews }
 
         const saveData = await bookModel.Create(data)
 
