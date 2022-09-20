@@ -46,11 +46,6 @@ const CreateUser = async function (req, res) {
 
     //======================================MongoDB data check==================================================
 
-    let passId = await usermodel.findOne({ password: password })
-    if (passId) {
-        return res.status(400).send({ status: false, msg: "This is password is already taken" })
-    }
-
     let emailId = await usermodel.findOne({ email: email })
     if (emailId) {
         return res.status(400).send({ status: false, msg: "This is emailId is already taken" })
@@ -68,64 +63,41 @@ const CreateUser = async function (req, res) {
     res.status(201).send({ status: true, message: "Success user register", data: savedata })
 }
 
+const login = async (req, res) => {
 
-// const loginuser = async (req, res) => {
-// let data = req.body
+    try{
 
-//         if (Object.keys(data).length == 0) 
-//         { return res.status(400).send({ status: false, msg: "incomplete request data/please provide more data" }) }
-
-
-//         let { email, password } = data
-//         if (!email) {
-//             return res.status(400).send({ status: false, msg: "please enter  your email" })
-//         } else if (!password) {
-//             return res.status(400).send({ status: false, msg: "please enter your password" })
-//         } else {
-//             let user = await userModel.findOne({ email: email, password: password });
-//             if (!user) {
-//                 return res.status(401).send({ status: false, msg: "your email or password is incorrect" })
-//             } else {
-//                 let token = jwt.sign(
-//                     {
-//                         authorId: user._id.toString(),
-//                         exp: "uug",
-//                         iat: "hhj",
-//                         team: "Group-01"
-//                     }, "group-0-secretkey");
-//                res.setHeader("x-api-key", token);
-//              res.status(200).send({ status: true, msg: "login successful ",token });
-//            }
-//   }
-// }
-// module.exports={CreateUser,loginuser}
-const loginuser = async (req, res) => {
     let data = req.body
 
     if (Object.keys(data).length == 0) { return res.status(400).send({ status: false, msg: "incomplete request data/please provide more data" }) }
 
-
     let { email, password } = data
-    if (!email) {
-        return res.status(400).send({ status: false, msg: "please enter  your email" })
-    } else if (!password) {
-        return res.status(400).send({ status: false, msg: "please enter your password" })
-    } else {
-        let user = await userModel.findOne({ email: email, password: password });
-        if (!user) {
-            return res.status(401).send({ status: false, msg: "your email or password is incorrect" })
-        } else {
-            let token = jwt.sign(
-                {
-                    authorId: user._id.toString(),
-                    exp: "uug",
-                    iat: "hhj",
-                    team: "Group-01"
-                }, "group-0-secretkey");
-            res.setHeader("x-api-key", token);
-            res.status(200).send({ status: true, msg: "login successful ", token });
-        }
-    }
+
+    if (!isValid(email))  return res.status(400).send({ status: false, msg: "please enter your email" })
+    if (!isValidEmailRegex(email)) return res.status(400).send({ status: false, msg: "please enter valid Email" })
+
+    if(!isValid(password)) return res.status(400).send({status : false , msg : "please enter your password"})
+    if (!isValidEmailRegex(password)) return res.status(400).send({ status: false, msg: "please enter valid password" })
+
+    let user = await userModel.findOne({ email: email, password: password });
+    if (!user) return res.status(401).send({ status: false, msg: "your email or password is incorrect" })
+
+    let token = jwt.sign(
+        {
+             authorId: user._id.toString(),
+             exp: "uug",
+            iat: "hhj",
+            team: "Group-01"
+        }, "group-0-secretkey");
+
+    res.setHeader("x-api-key", token);
+    res.status(200).send({ status: true, msg: "login successful ", token });
+
+ }catch(err){
+    res.status(500).send({status : false , msg : err.message})
+ }
 }
-module.exports = { CreateUser, loginuser }
+    
+
+module.exports = { CreateUser, login }
 

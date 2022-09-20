@@ -21,7 +21,7 @@ const createBooks = async function (req, res) {
 
         if (!isValid(title)) return res.status(400).send({ status: false, msg: "title is required and it's must be string" })
         if (!isValidRegex1(title)) return res.status(400).send({ status: false, msg: "Invalid title" })
-
+        
         if (!isValid(excerpt)) return res.status(400).send({ status: false, msg: "excerpt is required and it's must be string" })
         if (!isValidRegex1(excerpt)) return res.status(400).send({ status: false, msg: "Invalid excerpt" })
 
@@ -32,11 +32,11 @@ const createBooks = async function (req, res) {
         if (!isValidRegex2(ISBN)) return res.status(400).send({ status: false, msg: "Invalid ISBN number" })
 
         if (!isValid(category)) return res.status(400).send({ status: false, msg: "category is required and it's must be string" })
-        if (!isValidRegex1(category)) return res.status(400).send * { status: false, msg: "Invalid category" }
+        if (!isValidRegex1(category)) return res.status(400).send({ status: false, msg: "Invalid category" })
 
-        if (!Array.isArray(subcategory)) return res.status(400).send({ status: false, msg: "category is required and it's must be Array" })
+        if (!Array.isArray(subcategory)) return res.status(400).send({ status: false, msg: "subcategory is required and it's must be Array" })
         for(let element of subcategory){
-            if(!isValidRegex1(element)) return res.statu(400).send({status : false, msg :"invalid subcategory"})
+            if(!isValidRegex1(element)) return res.status(400).send({status : false, msg :`invalid subcategory value ${element}`})
         }
 
         if (reviews) {
@@ -53,9 +53,9 @@ const createBooks = async function (req, res) {
         const isUniqueISBN = await bookModel.findOne({ ISBN: ISBN })
         if (isUniqueISBN) return res.status(409).send({ status: false, msg: "ISBN number is already exist" })
 
-        const data = { title, excerpt, userId, ISBN, category, subcategory, releasedAt :moment().format("DD/MM/YYYY , h:mm:ss a"), reviews } // check when i not send released at then what happen
+        const data = { title, excerpt, userId, ISBN, category, subcategory, releasedAt :moment().format("DD-MM-YYYY"), reviews } // check when i not send released at then what happen
 
-        const saveData = await bookModel.Create(data)
+        const saveData = await bookModel.create(data)
 
         return res.status(201).send({ status: true, msg: "Book detail is successfully registered", data: saveData })
 
@@ -128,3 +128,4 @@ try {
 // - If the book document doesn't exist then return an HTTP status of 404 with a body like [this](#error-response-structure) 
 
 module.exports = {createBooks ,deletebyId}
+

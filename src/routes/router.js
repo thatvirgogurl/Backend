@@ -6,6 +6,8 @@ const bookController = require("../controller/bookController")
 //=============================== CreateUse r=======================================//
 router.post("/register",userController.CreateUser)
 
+//================================= LoginUser =======================================//
+router.post("/login", userController.login)
 //=============================== Registered a book ==================================//
 router.post("/books", bookController.createBooks)
 
