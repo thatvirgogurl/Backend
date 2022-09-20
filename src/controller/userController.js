@@ -7,61 +7,61 @@ const CreateUser = async function (req, res) {
      let {title,name,phone,email,password} = req.body
      let data = req.body 
     if (Object.keys(data).length == 0) {
-        res.status(400).send({ status: false, msg: "Data is required" })
+        return res.status(400).send({ status: false, msg: "Data is required" })
     }
     if (!["Mr", "Mrs", "Miss"].includes(title)) {
-        res.status(400).send({ status: false, msg: `required valid title :${title}` })
+        return res.status(400).send({ status: false, msg: `required valid title :${title}` })
     }
     //===============================name validation==============================//
     if(!name){
-        res.status(400).send({status:false, msg : "Name is mandory field"})
+        return res.status(400).send({status:false, msg : "Name is mandory field"})
     }
     if(!isValid(name)){
-        res.status(400).send({staus : false, msg: "Please give data in correct format"})
+        return res.status(400).send({staus : false, msg: "Please give data in correct format"})
     }
     //==================================password validation========================//
     if(!isValid(password)){
-    res.status(400).send({staus : false, msg: "Please give data in correct format"})
+       return res.status(400).send({staus : false, msg: "Please give data in correct format"})
     }
     if(!password){
-        res.status(400).send({status:false, msg : "Name is mandory field"})
+        return res.status(400).send({status:false, msg : "Name is mandory field"})
     }
     if (!isValidPasswordRegex(data.password)) {
-        res.status(400).send({ status: false, msg: "password is invalid : minlen is 8 and maxLen is 15" })
+        return res.status(400).send({ status: false, msg: "password is invalid : minlen is 8 and maxLen is 15" })
     }
     let passId= await usermodel.findOne({password:data.password})
     if (passId) {
-        res.status(400).send({ status: false, msg: "This is password is already taken" })
+        return res.status(400).send({ status: false, msg: "This is password is already taken" })
     }
     //=============================email validation============================//
 
     if(!isValid(email)){
-    res.status(400).send({staus : false, msg: "Please give data in correct format"})
+        return res.status(400).send({staus : false, msg: "Please give data in correct format"})
      }
     if(!email){
-        res.status(400).send({status:false, msg : "Email is mandory field"})
+        return res.status(400).send({status:false, msg : "Email is mandory field"})
     }
     if (!isValidEmailRegex(data.email)) {
-        res.status(400).send({ status: false, msg: "EmailId is invalid" })
+        return res.status(400).send({ status: false, msg: "EmailId is invalid" })
     }
     let emailId = await usermodel.findOne({email:data.email})
     if (emailId) {
-        res.status(400).send({ status: false, msg: "This is emailId is already taken" })
+        return res.status(400).send({ status: false, msg: "This is emailId is already taken" })
     }
     //==============================phone validation=========================//
 
     if(!isValid(phone)){
-    res.status(400).send({staus : false, msg: "Please give data in correct format"})
+        return res.status(400).send({staus : false, msg: "Please give data in correct format"})
     }
     if(!phone){
-        res.status(400).send({status:false, msg : "Phone is mandory field"})
+        return res.status(400).send({status:false, msg : "Phone is mandory field"})
     }
     if (!isValidPhoneRegex(data.phone)) {
-        res.status(400).send({ status: false, msg: "Phone number is invalid" })
+        return res.status(400).send({ status: false, msg: "Phone number is invalid" })
     }
     let phoneId = await usermodel.findOne({phone:data.phone})
     if (phoneId) {
-        res.status(400).send({ status: false, msg: "This Phone number is already taken" })
+        return res.status(400).send({ status: false, msg: "This Phone number is already taken" })
     }
 
     let savedata = await usermodel.create(data)
