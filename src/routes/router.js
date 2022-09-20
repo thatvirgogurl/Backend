@@ -3,11 +3,12 @@ const express = require("express")
 const router = express.Router();
 const userController= require("../controller/userController")
 
-//===============================CreateUser=======================================//
+//=============================== CreateUse r=======================================//
 router.post("/register",userController.CreateUser)
 
-//------------------------------Registered a book -----------------------------------------------//
+//=============================== Registered a book ==================================//
 // router.post("/books", bookController.createBooks)
+
 
 module.exports = router;
 
