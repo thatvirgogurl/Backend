@@ -103,5 +103,28 @@ const createBooks = async function (req, res) {
  
 
 // }
+const deletebyId = async function(req,res){
+try {
+    let bookId = req.param.bookId
+    if(!isValidObjectId(bookId)){
+        return res.status.send({status : false , msg : "This is invalid bookId"})
+    }
+    let BookId = await bookModel.findOne({_id : bookId , isDeleted : false})
+    if(!BookId){
+        return res.status(404).send({status : false , msg : "This bookId does not exit"})
+    }
+    let getbookId = await bookModel.findOneAndUpdate({_id:data},{$set :{isDeleted:true}})
+    return res.status(200).send({status : true ,message: 'Success',data : getbookId})
 
-module.exports.createBooks = createBooks
+    
+} catch (err) {
+    return res.status(500).send({status : false, msg : err.message})
+}
+
+}
+
+// ### DELETE /books/:bookId
+// - Check if the bookId exists and is not deleted. If it does, mark it deleted and return an HTTP status 200 with a response body with status and message.
+// - If the book document doesn't exist then return an HTTP status of 404 with a body like [this](#error-response-structure) 
+
+module.exports = {createBooks ,deletebyId}
