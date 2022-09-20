@@ -107,7 +107,7 @@ const deletebyId = async function(req,res){
 try {
     let bookId = req.param.bookId
     if(!isValidObjectId(bookId)){
-        return res.status.send({status : false , msg : "This is invalid bookId"})
+        return res.status(400).send({status : false , msg : "This is invalid bookId"})
     }
     let BookId = await bookModel.findOne({_id : bookId , isDeleted : false})
     if(!BookId){
