@@ -33,4 +33,5 @@ title: {
        
 },
  { timestamps: true });
+ 
 module.exports = mongoose.model('author',authorSchema)
