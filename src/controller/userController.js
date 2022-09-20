@@ -75,3 +75,47 @@ module.exports ={ CreateUser}
 // - Create a user document from request body.
 // - Return HTTP status 201 on a succesful user creation. Also return the user document. The response should be a JSON object like [this](#successful-response-structure)
 // - Return HTTP status 400 if no params or invalid params received in request body. The response should be a JSON object like [this](#error-response-structure)
+
+const userModel = require("../models/usermodel")
+const jwt = require("jsonwebtoken");
+const validEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+const passValid = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{15,}$/
+
+//---format---//
+
+let validE = validEmail.test(email)
+if (!validE) { return res.status(400).send({ status: false, msg: "email id valid format =>(examplexx@xyz.xyz)" }) }
+let validP = passValid.test(password)
+if (!validP) { return res.status(400).send({ status: false, msg: "please fill a valid password" }) }
+
+
+const loginuser = async (req, res) => {
+let data = req.body
+
+        if (Object.keys(data).length == 0) 
+        { return res.status(400).send({ status: false, msg: "incomplete request data/please provide more data" }) }
+
+
+        let { email, password } = data
+        if (!email) {
+            return res.status(400).send({ status: false, msg: "please enter  your email" })
+        } else if (!password) {
+            return res.status(400).send({ status: false, msg: "please enter your password" })
+        } else {
+            let user = await userModel.findOne({ email: email, password: password });
+            if (!user) {
+                return res.status(401).send({ status: false, msg: "your email or password is incorrect" })
+            } else {
+                let token = jwt.sign(
+                    {
+                        authorId: user._id.toString(),
+                        exp: "uug",
+                        iat: "hhj",
+                        team: "Group-01"
+                    }, "group-0-secretkey");
+               res.setHeader("x-api-key", token);
+             res.status(200).send({ status: true, msg: "login successful ",token });
+           }
+  }
+}
+module.exports={CreateUser,loginuser}
