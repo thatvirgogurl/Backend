@@ -84,8 +84,8 @@ const login = async (req, res) => {
 
     let token = jwt.sign(
         {
-             authorId: user._id.toString(),
-             exp: "uug",
+            authorId: user._id.toString(),
+            exp: "uug",
             iat: "hhj",
             team: "Group-01"
         }, "group-0-secretkey");
