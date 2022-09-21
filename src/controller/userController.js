@@ -4,7 +4,6 @@ const { isValid, isValidEmailRegex, isValidPasswordRegex, isValidPhoneRegex, isV
 const CreateUser = async function (req, res) {
 
     let { title, name, phone, email, password } = req.body
-    // let data = req.body
 
     if(Object.keys(req.body).length == 0) return res.status(400).send({ status: false, msg: "Data is required" })
 
@@ -14,9 +13,7 @@ const CreateUser = async function (req, res) {
     if (!["Mr", "Mrs", "Miss"].includes(title)) return res.status(400).send({ status: false, msg: `Title should be among Mr, Mrs, Miss` })
     
     //=============================== name validation==============================//
-    // if(!name){
-    //     return res.status(400).send({status:false, msg : "Name is mandory field"})
-    // }
+    
     if (!isValid(name)) return res.status(400).send({ status: false, msg: "Please give data in correct format" })
     if (!isValidRegex1(name)) return res.status(400).send({ status: false, msg: "invalid name" })
 
@@ -25,9 +22,6 @@ const CreateUser = async function (req, res) {
     if (!isValid(password)) {
         return res.status(400).send({ staus: false, msg: "Please give data in correct format" })
     }
-    // if(!password){
-    //     return res.status(400).send({status:false, msg : "Name is mandory field"})
-    // }
     if (!isValidPasswordRegex(password)) {
         return res.status(400).send({ status: false, msg: "Password should be min 8 ans max 100 character.It containt atleast--> 1 Uppercase letter, 1 Lowercase letter, 1 Number, 1 Special character" })
     }
@@ -37,9 +31,6 @@ const CreateUser = async function (req, res) {
     if (!isValid(email)) {
         return res.status(400).send({ staus: false, msg: "Please give data in correct format" })
     }
-    // if(!email){
-    //     return res.status(400).send({status:false, msg : "Email is mandory field"})
-    // }
     if (!isValidEmailRegex(email)) {
         return res.status(400).send({ status: false, msg: "EmailId is invalid" })
     }
@@ -49,9 +40,6 @@ const CreateUser = async function (req, res) {
     if (!isValid(phone)) {
         return res.status(400).send({ staus: false, msg: "Please give data in correct format" })
     }
-    // if(!phone){
-    //     return res.status(400).send({status:false, msg : "Phone is mandory field"})
-    // }
     if (!isValidPhoneRegex(phone)) {
         return res.status(400).send({ status: false, msg: "Phone number is invalid" })
     }
