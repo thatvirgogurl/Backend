@@ -63,7 +63,7 @@ const CreateUser = async function (req, res) {
     res.status(201).send({ status: true, message: "Success user register", data: savedata })
 }
 
-const loginuser = async (req, res) => {
+const login = async (req, res) => {
 
     try{
 
@@ -99,5 +99,5 @@ const loginuser = async (req, res) => {
 }
     
 
-module.exports = { CreateUser, loginuser }
+module.exports = { CreateUser, login }
 
