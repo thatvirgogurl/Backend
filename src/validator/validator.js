@@ -27,12 +27,12 @@ const isValidObjectId = (value)=>{
 }
 
 const isValidPasswordRegex = (value)=>{
-    if(!/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{15,}$/.test(value)) return false
+    if(!/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%&])[a-zA-Z0-9@#$%&]{8,15}$/.test(value)) return false
     return true
 }
 
 const isValidEmailRegex = (value)=>{
-    if(!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value)) return false
+    if(!/^[a-z0-9_]{3,}@[a-z]{3,}[.]{1}[a-z]{3,6}$/.test(value)) return false
     return true
 }
 
