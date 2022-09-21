@@ -46,10 +46,10 @@ const CreateUser = async function (req, res) {
 
     //======================================MongoDB data check==================================================
 
-    let passId = await usermodel.findOne({ password: password })
-    if (passId) {
-        return res.status(400).send({ status: false, msg: "This is password is already taken" })
-    }
+    // let passId = await usermodel.findOne({ password: password })
+    // if (passId) {
+    //     return res.status(400).send({ status: false, msg: "This is password is already taken" })
+    // }
 
     let emailId = await usermodel.findOne({ email: email })
     if (emailId) {

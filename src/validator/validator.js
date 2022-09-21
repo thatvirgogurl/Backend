@@ -12,7 +12,7 @@ const isValid = (value)=>{
 }
 
 const isValidRegex1 = (value)=>{
-    if(/^[a-zA-Z-" "]$/.test(value)) return true
+    if(/^[a-zA-Z-" "]{2,}$/.test(value)) return true
     return false
 }
 
@@ -22,7 +22,7 @@ const isValidRegex2 = (value)=>{
 }
 
 const isValidObjectId = (value)=>{
-    if(!mongoose.Schema.Type.ObjectId.isValid(value)) return false ;
+    if(!mongoose.Types.ObjectId.isValid(value)) return false;
     return true
 }
 
