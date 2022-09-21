@@ -1,8 +1,8 @@
 const mongoose = require("mongoose")
 
 const isValidRequestBody = (value)=>{
-    if(Object.keys(value).length == 0) return true ;
-    return false;
+    if(Object.keys(value).length == 0) return false ;
+    return true;
 }
 
 const isValid = (value)=>{
@@ -12,8 +12,8 @@ const isValid = (value)=>{
 }
 
 const isValidRegex1 = (value)=>{
-    if(!/^[a-zA-Z]+(\s[a-zA-Z]+)?$/.test(value)) return false
-    return true
+    if(/^[a-zA-Z-" "]$/.test(value)) return true
+    return false
 }
 
 const isValidRegex2 = (value)=>{
@@ -27,12 +27,12 @@ const isValidObjectId = (value)=>{
 }
 
 const isValidPasswordRegex = (value)=>{
-    if(!/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{15,}$/.test(value)) return false
+    if(!/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%&])[a-zA-Z0-9@#$%&]{8,15}$/.test(value)) return false
     return true
 }
 
 const isValidEmailRegex = (value)=>{
-    if(!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value)) return false
+    if(!/^[a-z0-9_]{3,}@[a-z]{3,}[.]{1}[a-z]{3,6}$/.test(value)) return false
     return true
 }
 
