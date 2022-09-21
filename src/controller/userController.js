@@ -5,58 +5,58 @@ emailregex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
 phoneregex = "(0/91)?[7-9][0-9]{9}"
 
 
-const ValidString = function(data){
-if(typeof data!= "string"|| data.trim().length==0 ){
-return false ;
-}
+const ValidString = function (data) {
+    if (typeof data != "string" || data.trim().length == 0) {
+        return false;
+    }
     return true;
 }
 
-const CreateUser = async function(req,res){
-//  let data = req.body
- if (Object.keys(req.body).length==0){
-    res.status(400).send({status : false , msg : "Data is required"})
- }
- let requireddata = [title,name,phone,email,password,address,]
- for(data of requireddata){
-    if(!isValidString(req.body[data]))
-    return res.status(400).send({status:false , msg :`${data} is invalid`})
- }
- for (data of requireddata)
- if(!req["body"].OwnProperty(req.body)){
-    return res.status(400).send({status : false , msg : `please provide ${data}is mandatory field`})
- }
-    
- if(![Mr, Mrs, Miss].includes(title)){
-    res.status(400).send({status : false , msg : `required valid title :${title}`})
- }
-if(!passwordregex.test(req.body)){
-    res.status(400).send({status : false , msg : "password is invalid : minlen is 8 and maxLen is 15"})
-}
-//=============================email validation============================//
-if (!emailregex.test(req.body)){
-    res.status(400).send({status : false , msg : "EmailId is invalid"})
-}
-let emailId = await usermodel.find({email})
-    if(emailId.length!==0){
-        res.status(400).send({status : false , msg : "This is emailId is already taken"})
+const CreateUser = async function (req, res) {
+    //  let data = req.body 
+    if (Object.keys(req.body).length == 0) {
+        res.status(400).send({ status: false, msg: "Data is required" })
     }
-//==============================phone validation=========================//
-if(!phoneregex.test(req.body)){
-    res.status(400).send({status : false , msg : "Phone number is invalid"})
+    let requireddata = [title, name, phone, email, password, address]
+    for (data of requireddata) {
+        if (!isValidString(req.body[data]))
+            return res.status(400).send({ status: false, msg: `${data} is invalid` })
+    }
+    for (data of requireddata)
+        if (!req["body"].OwnProperty(req.body)) {
+            return res.status(400).send({ status: false, msg: `please provide ${data}is mandatory field` })
+        }
+
+    if (![Mr, Mrs, Miss].includes(title)) {
+        res.status(400).send({ status: false, msg: `required valid title :${title}` })
+    }
+    if (!passwordregex.test(req.body)) {
+        res.status(400).send({ status: false, msg: "password is invalid : minlen is 8 and maxLen is 15" })
+    }
+    //=============================email validation============================//
+    if (!emailregex.test(req.body)) {
+        res.status(400).send({ status: false, msg: "EmailId is invalid" })
+    }
+    let emailId = await usermodel.find({ email })
+    if (emailId.length !== 0) {
+        res.status(400).send({ status: false, msg: "This is emailId is already taken" })
+    }
+    //==============================phone validation=========================//
+    if (!phoneregex.test(req.body)) {
+        res.status(400).send({ status: false, msg: "Phone number is invalid" })
+    }
+    let phone = await usermodel.find({ phone })
+    if (phone.lenght !== 0) {
+        res.status(400).send({ status: false, msg: "This Phone number is already taken" })
+    }
+
+    let savedata = await usermodel.create(data)
+    res.status(201).send({ status: true, message: Success, data: savedata })
+
 }
-let phone =await usermodel.find({phone})
-if(phone.lenght!==0){
-    res.status(400).send({status : false , msg : "This Phone number is already taken"})
-}
-
- let savedata = await usermodel.create(data)
- res.status(201).send({status : true ,  message: Success , data : savedata })
-
-}
 
 
-module.exports ={ CreateUser}
+module.exports = { CreateUser }
 // { 
 //     title: {string, mandatory, enum[Mr, Mrs, Miss]},
 //     name: {string, mandatory},
@@ -90,32 +90,31 @@ if (!validP) { return res.status(400).send({ status: false, msg: "please fill a 
 
 
 const loginuser = async (req, res) => {
-let data = req.body
+    let data = req.body
 
-        if (Object.keys(data).length == 0) 
-        { return res.status(400).send({ status: false, msg: "incomplete request data/please provide more data" }) }
+    if (Object.keys(data).length == 0) { return res.status(400).send({ status: false, msg: "incomplete request data/please provide more data" }) }
 
 
-        let { email, password } = data
-        if (!email) {
-            return res.status(400).send({ status: false, msg: "please enter  your email" })
-        } else if (!password) {
-            return res.status(400).send({ status: false, msg: "please enter your password" })
+    let { email, password } = data
+    if (!email) {
+        return res.status(400).send({ status: false, msg: "please enter  your email" })
+    } else if (!password) {
+        return res.status(400).send({ status: false, msg: "please enter your password" })
+    } else {
+        let user = await userModel.findOne({ email: email, password: password });
+        if (!user) {
+            return res.status(401).send({ status: false, msg: "your email or password is incorrect" })
         } else {
-            let user = await userModel.findOne({ email: email, password: password });
-            if (!user) {
-                return res.status(401).send({ status: false, msg: "your email or password is incorrect" })
-            } else {
-                let token = jwt.sign(
-                    {
-                        authorId: user._id.toString(),
-                        exp: "uug",
-                        iat: "hhj",
-                        team: "Group-01"
-                    }, "group-0-secretkey");
-               res.setHeader("x-api-key", token);
-             res.status(200).send({ status: true, msg: "login successful ",token });
-           }
-  }
+            let token = jwt.sign(
+                {
+                    authorId: user._id.toString(),
+                    exp: "uug",
+                    iat: "hhj",
+                    team: "Group-01"
+                }, "group-0-secretkey");
+            res.setHeader("x-api-key", token);
+            res.status(200).send({ status: true, msg: "login successful ", token });
+        }
+    }
 }
-module.exports={CreateUser,loginuser}
+module.exports = { CreateUser, loginuser }

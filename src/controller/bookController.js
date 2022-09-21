@@ -14,31 +14,31 @@ const createBooks = async function (req, res) {
 
         // destructuring parameter of request body 
 
-        const { title, excerpt, userId, ISBN, category, subcategory,reviews, } = requestBody
+        const { title, excerpt, userId, ISBN, category, subcategory,reviews} = requestBody
 
         //----------------------------- Start Validation ----------------------------------------------
 
-        if (!isValid(title)) return res.status(400).send({ status: false, msg: "title is required" })
+        if (!isValid(title)) return res.status(400).send({ status: false, msg: "title is required and it's must be string" })
         if (!isValidRegex1(title)) return res.status(400).send({ status: false, msg: "Invalid title" })
 
-        if (!isValid(excerpt)) return res.status(400).send({ status: false, msg: "excerpt is required" })
+        if (!isValid(excerpt)) return res.status(400).send({ status: false, msg: "excerpt is required and it's must be string" })
         if (!isValidRegex1(excerpt)) return res.status(400).send * { status: false, msg: "Invalid excerpt" }
 
-        if (!isValid(userId)) return res.status(400).send({ status: false, msg: "userId is required" })
+        if (!isValid(userId)) return res.status(400).send({ status: false, msg: "userId is required and it's must be string" })
         if (!isValidObjectId(userId)) return res.status(400).send({ status: false, msg: "Invalid userId" })
 
-        if (!isValid(ISBN)) return res.status(400).send({ status: false, msg: "ISBN number is required" })
+        if (!isValid(ISBN)) return res.status(400).send({ status: false, msg: "ISBN number is required and it's must be string" })
         if (!isValidRegex2(ISBN)) return res.status(400).send({ status: false, msg: "Invalid ISBN number" })
 
-        if (!isValid(category)) return res.status(400).send({ status: false, msg: "category is required" })
+        if (!isValid(category)) return res.status(400).send({ status: false, msg: "category is required and it's must be string" })
         if (!isValidRegex1(category)) return res.status(400).send * { status: false, msg: "Invalid category" }
 
-        if (!isValid(subcategory)) return res.status(400).send({ status: false, msg: "category is required" })
-        if (!isValidRegex1(subcategory)) return res.status(400).send({ status: false, msg: "Invalid subcategory" })
+        if (!isValid(subcategory)) return res.status(400).send({ status: false, msg: "category is required and it's must be string" })
+        if (!isValidRegex1(subcategory)) return res.status(400).send({ status: false, msg: "Invalid subcategory" }) // check subcategory array or string if array then changes
 
         if (reviews) {
             if (typeof reviews !== "number") return res.status(400).send({ status: false, msg: "reviews in Nuber type" })
-            if (!/^[0-9]$/.test(reviews)) return res.status(400).send({ status: false, msg: "Invalid review format" })
+            if (!/^[0-9]$/.test(reviews)) return res.status(400).send({ status: false, msg: "Invalid review Number" }) // change in regex
         }
 
         const isUniqueTitle = await bookModel.findOne({ title: title })
@@ -50,14 +50,14 @@ const createBooks = async function (req, res) {
         const isUniqueISBN = await bookModel.findOne({ ISBN: ISBN })
         if (isUniqueISBN) return res.status(409).send({ status: false, msg: "ISBN number is already exist" })
 
-        const data = { title, excerpt, userId, ISBN, category, subcategory, releasedAt :moment().format("DD/MM/YYYY , h:mm:ss a"), reviews }
+        const data = { title, excerpt, userId, ISBN, category, subcategory, releasedAt :moment().format("DD/MM/YYYY , h:mm:ss a"), reviews } // check when i not send released at then what happen
 
         const saveData = await bookModel.Create(data)
 
-        return res.status(200).send({ status: true, msg: "Book detail is successfully registered", data: saveData })
+        return res.status(201).send({ status: true, msg: "Book detail is successfully registered", data: saveData })
 
     } catch (err) {
-        return res.status(500).send(err.message)
+        return res.status(500).send({status : false, msg : err.message})
     }
 }
 

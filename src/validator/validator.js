@@ -12,18 +12,32 @@ const isValid = (value)=>{
 }
 
 const isValidRegex1 = (value)=>{
-    if(!/^[a-zA-Z]$/.test(value)) return false
+    if(!/^[a-zA-Z]+(\s[a-zA-Z]+)?$/.test(value)) return false
     return true
 }
 
 const isValidRegex2 = (value)=>{
-    if(!/^[0-9]$/.test(value)) return false
+    if(!/^(?:ISBN(?:-13)?:?\ )?(?=[0-9]{13}$|(?=(?:[0-9]+[-\ ]){4})[-\ 0-9]{17}$)97[89][-\ ]?[0-9]{1,5}[-\ ]?[0-9]+[-\ ]?[0-9]+[-\ ]?[0-9]$/.test(value)) return false
     return true
 }
 
 const isValidObjectId = (value)=>{
-    if(!mongoose.Type.ObjectId.isValid(value)) return false ;
+    if(!mongoose.Schema.Type.ObjectId.isValid(value)) return false ;
     return true
 }
 
-module.exports = {isValidRequestBody,isValid,isValidRegex1,isValidRegex2,isValidObjectId}
+const isValidPasswordRegex = (value)=>{
+    if(!/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{15,}$/.test(value)) return false
+    return true
+}
+
+const isValidEmailRegex = (value)=>{
+    if(!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value)) return false
+    return true
+}
+
+const isValidPhoneRegex = (value)=>{
+    if(/^(\+91[\-\s]?)?[0]?(91)?[789]\d{9}$/.test(value)) return true
+    return false
+}
+module.exports = {isValidRequestBody,isValid,isValidRegex1,isValidRegex2,isValidObjectId,isValidPasswordRegex,isValidEmailRegex,isValidPhoneRegex}
