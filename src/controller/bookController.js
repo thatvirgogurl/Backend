@@ -1,4 +1,4 @@
-const bookModel = require("../../models/bookmodel");
+const bookModel = require("../models/bookmodel");
 const userModel = require("../models/usermodel")
 const moment = require("moment")
 const {isValidRequestBody,isValid,isValidRegex1,isValidRegex2,isValidObjectId} = require("../validator/validator")

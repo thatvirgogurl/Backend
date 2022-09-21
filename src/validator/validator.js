@@ -1,8 +1,8 @@
 const mongoose = require("mongoose")
 
 const isValidRequestBody = (value)=>{
-    if(Object.keys(value).length == 0) return true ;
-    return false;
+    if(Object.keys(value).length == 0) return false ;
+    return true;
 }
 
 const isValid = (value)=>{
@@ -12,8 +12,8 @@ const isValid = (value)=>{
 }
 
 const isValidRegex1 = (value)=>{
-    if(!/^[a-zA-Z]+(\s[a-zA-Z]+)?$/.test(value)) return false
-    return true
+    if(/^[a-zA-Z-" "]$/.test(value)) return true
+    return false
 }
 
 const isValidRegex2 = (value)=>{
