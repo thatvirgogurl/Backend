@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken");
 const usermodel = require("../models/usermodel")
 const { isValid, isValidEmailRegex, isValidPasswordRegex, isValidPhoneRegex, isValidRegex1 } = require("../validator/validator")
 
@@ -5,15 +6,15 @@ const CreateUser = async function (req, res) {
 
     let { title, name, phone, email, password } = req.body
 
-    if(Object.keys(req.body).length == 0) return res.status(400).send({ status: false, msg: "Data is required" })
+    if (Object.keys(req.body).length == 0) return res.status(400).send({ status: false, msg: "Data is required" })
 
     //============================== Title validation ==========================================//
 
-    if(!isValid(title)) return res.status(400).send({status : false , msg : "Please give data in Correct format"})
+    if (!isValid(title)) return res.status(400).send({ status: false, msg: "Please give data in Correct format" })
     if (!["Mr", "Mrs", "Miss"].includes(title)) return res.status(400).send({ status: false, msg: `Title should be among Mr, Mrs, Miss` })
-    
+
     //=============================== name validation==============================//
-    
+
     if (!isValid(name)) return res.status(400).send({ status: false, msg: "Please give data in correct format" })
     // if (!isValidRegex1(name)) return res.status(400).send({ status: false, msg: "invalid name" })
 
@@ -51,53 +52,55 @@ const CreateUser = async function (req, res) {
         return res.status(400).send({ status: false, msg: "This is emailId is already taken" })
     }
 
-    let phoneId = await usermodel.findOne({ phone:phone })
+    let phoneId = await usermodel.findOne({ phone: phone })
     if (phoneId) {
         return res.status(400).send({ status: false, msg: "This Phone number is already taken" })
     }
 
     //================================== End Validation ==========================================//
 
-    const data = {title, name, phone, email, password}
+    const data = { title, name, phone, email, password }
     let savedata = await usermodel.create(data)
     res.status(201).send({ status: true, message: "Success user register", data: savedata })
 }
 
-const login = async (req, res) => {
 
-    try{
+const loginuser = async (req, res) => {
 
-    let data = req.body
+    try {
 
-    if (Object.keys(data).length == 0) { return res.status(400).send({ status: false, msg: "incomplete request data/please provide more data" }) }
+        let data = req.body
 
-    let { email, password } = data
+        if (Object.keys(data).length == 0) { return res.status(400).send({ status: false, msg: "incomplete request data/please provide more data" }) }
 
-    if (!isValid(email))  return res.status(400).send({ status: false, msg: "please enter your email" })
-    if (!isValidEmailRegex(email)) return res.status(400).send({ status: false, msg: "please enter valid Email" })
+        let { email, password } = data
 
-    if(!isValid(password)) return res.status(400).send({status : false , msg : "please enter your password"})
-    if (!isValidEmailRegex(password)) return res.status(400).send({ status: false, msg: "please enter valid password" })
+        if (!isValid(email)) return res.status(400).send({ status: false, msg: "please enter your email" })
+        if (!isValidEmailRegex(email)) return res.status(400).send({ status: false, msg: "please enter valid Email" })
 
-    let user = await userModel.findOne({ email: email, password: password });
-    if (!user) return res.status(401).send({ status: false, msg: "your email or password is incorrect" })
+        if (!isValid(password)) return res.status(400).send({ status: false, msg: "please enter your password" })
+        if (!isValidEmailRegex(password)) return res.status(400).send({ status: false, msg: "please enter valid password" })
 
-    let token = jwt.sign(
-        {
-            authorId: user._id.toString(),
-            exp: "uug",
-            iat: "hhj",
-            team: "Group-01"
-        }, "group-0-secretkey");
+        let user = await userModel.findOne({ email: email, password: password });
+        if (!user) return res.status(401).send({ status: false, msg: "your email or password is incorrect" })
 
-    res.setHeader("x-api-key", token);
-    res.status(200).send({ status: true, msg: "login successful ", token });
+        let token = jwt.sign(
+            {
+                authorId: user._id.toString(),
+                exp: "uug",
+                iat: "hhj",
+                team: "Group-01"
+            }, "group-0-secretkey");
 
- }catch(err){
-    res.status(500).send({status : false , msg : err.message})
- }
+        res.setHeader("x-api-key", token);
+        res.status(200).send({ status: true, msg: "login successful ", token });
+
+    } catch (error) {
+        res.status(500).send({ status: false, msg: err.message })
+    }
 }
-    
 
-module.exports = { CreateUser, login }
+
+
+module.exports = { CreateUser, loginuser }
 
