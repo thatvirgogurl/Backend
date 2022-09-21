@@ -1,4 +1,4 @@
-const { name } = require("nodeman/lib/mustache");
+//const { name } = require("nodeman/lib/mustache");
 const usermodel = require("../models/usermodel")
 passwordregex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{15,}$/
 emailregex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
