@@ -41,3 +41,24 @@ const isValidPhoneRegex = (value)=>{
     return false
 }
 module.exports = {isValidRequestBody,isValid,isValidRegex1,isValidRegex2,isValidObjectId,isValidPasswordRegex,isValidEmailRegex,isValidPhoneRegex}
+
+
+
+
+function solution(a,arr) {
+    //Write your solution here
+      for(let i=a-1;i>=0;i--){
+          if(i==0){                            2 ,5 ,4 ,8 ,9
+              arr[i] = -1
+              continue;
+          }
+          let max = -5
+          for(let j=0;j<i;j++){
+              if(max<arr[j]){
+                  max = arr[j]
+              }
+          }
+          arr[i] = max
+      }
+      return arr.join(" ")
+  }
