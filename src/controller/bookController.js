@@ -21,7 +21,7 @@ const createBooks = async function (req, res) {
 
         if (!isValid(title)) return res.status(400).send({ status: false, msg: "title is required and it's must be string" })
         if (!isValidRegex1(title)) return res.status(400).send({ status: false, msg: "Invalid title" })
-
+        
         if (!isValid(excerpt)) return res.status(400).send({ status: false, msg: "excerpt is required and it's must be string" })
         if (!isValidRegex1(excerpt)) return res.status(400).send({ status: false, msg: "Invalid excerpt" })
 
@@ -32,11 +32,11 @@ const createBooks = async function (req, res) {
         if (!isValidRegex2(ISBN)) return res.status(400).send({ status: false, msg: "Invalid ISBN number" })
 
         if (!isValid(category)) return res.status(400).send({ status: false, msg: "category is required and it's must be string" })
-        if (!isValidRegex1(category)) return res.status(400).send * { status: false, msg: "Invalid category" }
+        if (!isValidRegex1(category)) return res.status(400).send({ status: false, msg: "Invalid category" })
 
-        if (!Array.isArray(subcategory)) return res.status(400).send({ status: false, msg: "category is required and it's must be Array" })
+        if (!Array.isArray(subcategory)) return res.status(400).send({ status: false, msg: "subcategory is required and it's must be Array" })
         for(let element of subcategory){
-            if(!isValidRegex1(element)) return res.statu(400).send({status : false, msg :"invalid subcategory"})
+            if(!isValidRegex1(element)) return res.status(400).send({status : false, msg :`invalid subcategory value ${element}`})
         }
 
         if (reviews) {
@@ -55,11 +55,15 @@ const createBooks = async function (req, res) {
 
         const data = { title, excerpt, userId, ISBN, category, subcategory, releasedAt: moment().format("DD/MM/YYYY , h:mm:ss a"), reviews } // check when i not send released at then what happen
 
-        const saveData = await bookModel.Create(data)
+        // const data = { title, excerpt, userId, ISBN, category, subcategory, releasedAt :moment().format("DD-MM-YYYY"), reviews } // check when i not send released at then what happen
+
+
+        const saveData = await bookModel.create(data)
 
         return res.status(201).send({ status: true, msg: "Book detail is successfully registered", data: saveData })
 
-    } catch (err) {
+    } 
+    catch (err) {
         return res.status(500).send({ status: false, msg: err.message })
     }
 }
@@ -122,7 +126,6 @@ const updatebooks= async function (req, res) {
 }
 
 
-module.exports = { createBooks, getallBook, updatebooks }
 
 // const createBooks = async function(req,res){
 
@@ -163,6 +166,54 @@ module.exports = { createBooks, getallBook, updatebooks }
  
 
 // }
+const deletebyId = async function(req,res){
+try {
+    let bookId = req.param.bookId
+    if(!isValidObjectId(bookId)){
+        return res.status(400).send({status : false , msg : "This is invalid bookId"})
+    }
+    let BookId = await bookModel.findOne({_id : bookId , isDeleted : false})
+    if(!BookId){
+        return res.status(404).send({status : false , msg : "This bookId does not exit"})
+    }
+    let getbookId = await bookModel.findOneAndUpdate({_id:data},{$set :{isDeleted:true}})
+    return res.status(200).send({status : true ,message: 'Success',data : getbookId})
 
-module.exports.createBooks = createBooks
+    
+} catch (err) {
+    return res.status(500).send({status : false, msg : err.message})
+}
+
+}
+
+// ### DELETE /books/:bookId
+// - Check if the bookId exists and is not deleted. If it does, mark it deleted and return an HTTP status 200 with a response body with status and message.
+// - If the book document doesn't exist then return an HTTP status of 404 with a body like [this](#error-response-structure) 
+const getBooksById = async function (req, res) {
+    try {
+        const bookId = req.params.bookId;
+        if (!isValidObjectId(bookId)) {
+            return res.status(400).send({ status: false, msg: "invalid bookId" })
+        }
+
+        const foundedBook = await bookModel.findOne({ _id: bookId, isDeleted: false }).select({ __v: 0 })
+        console.log(foundedBook)
+
+        if (!foundedBook) {
+            return res.status(404).send({ status: false, message: "book not found" })
+        }
+        const availableReviews = await reviewModel.find({ bookId: foundedBook._id, isDeleted: false })
+            .select({ isDeleted: 0, createdAt: 0, updateAt: 0, __v: 0 })
+        foundedBook._doc["reviewData"] = availableReviews
+        //foundedBook.reviewData= "availableReviews"
+        console.log("hjyhvh", foundedBook)
+        return res.status(200).send({ status: true, message: "Books list", data: foundedBook })
+    } catch (error) { res.status(500).send({ msg: error.message }) }
+}
+
+
+module.exports = { createBooks, deletebyId, getallBook, getBooksById,updatebooks }
+
+
+
 
