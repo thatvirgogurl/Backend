@@ -63,46 +63,6 @@ const createBooks = async function (req, res) {
         return res.status(500).send({status : false, msg : err.message})
     }
 }
-
-// const createBooks = async function(req,res){
-
-//     const requestBody = req.body
-
-//     if(!isValidRequestBody(requestBody)) return res.status(400).send({ status: false, msg: "No parameter is found ,Plz provide detail" })
-    
-//     let validateRequestBody = ["title","excerpt","userId","ISBN","category"]
-//     const { title, excerpt, userId, ISBN, category, subcategory,reviews} = requestBody
-
-//     for(let element of validateRequestBody){
-//         if(!isValid(requestBody[element])) return res.status(400).send({status : false , mag :`${element} is required and it's must be string`})
-//     }
-
-//     for(let element of validateRequestBody){
-//         if(element == "userId" || element == "ISBN") continue;
-//         else{
-//             if(!isValidRegex1(requestBody[element])) return res.status(400).send({status : false , msg : `invalid ${element}`})
-//         }
-//     }
-
-//     if(!isValidObjectId(userId)) return res.status(400).send({ status: false, msg: "Invalid userId" })
-//     if (!isValidRegex2(ISBN)) return res.status(400).send({ status: false, msg: "Invalid ISBN number" })
-
-//     if (!Array.isArray(subcategory)) return res.status(400).send({ status: false, msg: "category is required and it's must be Array" })
-//     if (!isValidRegex1(subcategory)) return res.status(400).send({ status: false, msg: "Invalid subcategory" }) // check subcategory array or string if array then changes
-
-//     if (reviews) {
-//         if (typeof reviews !== "number") return res.status(400).send({ status: false, msg: "reviews in Nuber type" })
-//         if (!/^[0-9]$/.test(reviews)) return res.status(400).send({ status: false, msg: "Invalid review Number" }) // change in regex
-//     }
-
-//     for(element )
-
-
-
-
- 
-
-// }
 const deletebyId = async function(req,res){
 try {
     let bookId = req.param.bookId
@@ -111,7 +71,7 @@ try {
     }
     let BookId = await bookModel.findOne({_id : bookId , isDeleted : false})
     if(!BookId){
-        return res.status(404).send({status : false , msg : "This bookId does not exit"})
+        return res.status(404).send({status : false , msg : "This bookId does not exit , Its deleted"})
     }
     let getbookId = await bookModel.findOneAndUpdate({_id:data},{$set :{isDeleted:true}})
     return res.status(200).send({status : true ,message: 'Success',data : getbookId})
