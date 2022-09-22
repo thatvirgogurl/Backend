@@ -16,7 +16,7 @@ const CreateUser = async function (req, res) {
     //=============================== name validation==============================//
 
     if (!isValid(name)) return res.status(400).send({ status: false, msg: "Please give data in correct format" })
-    // if (!isValidRegex1(name)) return res.status(400).send({ status: false, msg: "invalid name" })
+    if (!isValidRegex1(name)) return res.status(400).send({ status: false, msg: "invalid name" })
 
     //================================== password validation ====================================//
 

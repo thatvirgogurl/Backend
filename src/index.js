@@ -4,8 +4,7 @@ const route = require('./routes/route');
 const mongoose = require('mongoose');
 const app = express();
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());   
 
 
 mongoose.connect("mongodb+srv://Monalisamishra:MDYlL3MKtGxQa59a@cluster0.7zrfpkj.mongodb.net/group1Database", {
