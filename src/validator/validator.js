@@ -6,7 +6,8 @@ const isValidRequestBody = (value)=>{
 }
 
 const isValid = (value)=>{
-    if(!value || typeof value === "undefined" || typeof value === "null") return false;
+    // if(!value || typeof value === "undefined" || typeof value === "null") return false;
+    if(!value) return false
     if(typeof value !== "string" || value.trim().length === 0) return false;
     return true
 }
@@ -37,28 +38,15 @@ const isValidEmailRegex = (value)=>{
 }
 
 const isValidPhoneRegex = (value)=>{
-    if(/^(\+91[\-\s]?)?[0]?(91)?[789]\d{9}$/.test(value)) return true
+    if(/^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/.test(value)) return true // change phone regex , 
     return false
+    // 9011607659
+    // 09011607659
+    // +919011607659;
+    // 919011607659
 }
 module.exports = {isValidRequestBody,isValid,isValidRegex1,isValidRegex2,isValidObjectId,isValidPasswordRegex,isValidEmailRegex,isValidPhoneRegex}
 
 
 
 
-function solution(a,arr) {
-    //Write your solution here
-      for(let i=a-1;i>=0;i--){
-          if(i==0){                            2 ,5 ,4 ,8 ,9
-              arr[i] = -1
-              continue;
-          }
-          let max = -5
-          for(let j=0;j<i;j++){
-              if(max<arr[j]){
-                  max = arr[j]
-              }
-          }
-          arr[i] = max
-      }
-      return arr.join(" ")
-  }

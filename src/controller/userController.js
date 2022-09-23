@@ -4,13 +4,13 @@ const { isValid, isValidEmailRegex, isValidPasswordRegex, isValidPhoneRegex, isV
 
 const CreateUser = async function (req, res) {
 
-    let { title, name, phone, email, password } = req.body
+    let { title, name, phone, email, password , address} = req.body
 
     if (Object.keys(req.body).length == 0) return res.status(400).send({ status: false, msg: "Data is required" })
 
     //============================== Title validation ==========================================//
 
-    if (!isValid(title)) return res.status(400).send({ status: false, msg: "Please give data in Correct format" })
+    if (!isValid(title)) return res.status(400).send({ status: false, msg: "Please give title data in Correct format" })
     if (!["Mr", "Mrs", "Miss"].includes(title)) return res.status(400).send({ status: false, msg: `Title should be among Mr, Mrs, Miss` })
 
     //=============================== name validation==============================//
@@ -59,7 +59,7 @@ const CreateUser = async function (req, res) {
 
     //================================== End Validation ==========================================//
 
-    const data = { title, name, phone, email, password }
+    const data = { title, name, phone, email, password, address}
     let savedata = await usermodel.create(data)
     res.status(201).send({ status: true, message: "Success user register", data: savedata })
 }
@@ -71,7 +71,7 @@ const loginuser = async (req, res) => {
 
         let data = req.body
 
-        if (Object.keys(data).length == 0) { return res.status(400).send({ status: false, msg: "incomplete request data/please provide more data" }) }
+        if (Object.keys(data).length == 0) { return res.status(400).send({ status: false, msg: "incomplete request data, please provide more data" }) }
 
         let { email, password } = data
 
@@ -79,24 +79,24 @@ const loginuser = async (req, res) => {
         if (!isValidEmailRegex(email)) return res.status(400).send({ status: false, msg: "please enter valid Email" })
 
         if (!isValid(password)) return res.status(400).send({ status: false, msg: "please enter your password" })
-        if (!isValidEmailRegex(password)) return res.status(400).send({ status: false, msg: "please enter valid password" })
+        if (!isValidPasswordRegex(password)) return res.status(400).send({ status: false, msg: "please enter valid password" })
 
-        let user = await userModel.findOne({ email: email, password: password });
+        let user = await usermodel.findOne({ email: email, password: password });
         if (!user) return res.status(401).send({ status: false, msg: "your email or password is incorrect" })
 
         let token = jwt.sign(
             {
                 authorId: user._id.toString(),
-                exp: "uug",
-                iat: "hhj",
+                
                 team: "Group-01"
-            }, "group-0-secretkey");
+            }, "group-0-secretkey", {expiresIn : "300s"});
+        let decoded = jwt.verify(token ,"group-0-secretkey" )
 
         res.setHeader("x-api-key", token);
-        res.status(200).send({ status: true, msg: "login successful ", token });
+        res.status(200).send({ status: true, msg: "login successful ", data : {token : token , iat : new Date() , exp : new Date(decoded.exp * 1000)} });
 
     } catch (error) {
-        res.status(500).send({ status: false, msg: err.message })
+        res.status(500).send({ status: false, msg: error.message })
     }
 }
 

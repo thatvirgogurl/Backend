@@ -11,7 +11,7 @@ const bookSchema = new mongoose.Schema({
     excerpt: { type: String, required: true },
     userId: {
         type: ObjectId,
-        ref: "author",
+        ref: "user",
         required: true
 },
     ISBN: { type: String, required: true, unique:true },

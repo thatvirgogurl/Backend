@@ -10,7 +10,7 @@ let authentication = function (req, res, next) {
         let token = req.headers["x-api-key"];
         if (!token) return res.status(400).send({ status: false, msg: "token must be present" });
 
-        jwt.verify(token, "This is secret key", (error, decodedToken) => {
+        jwt.verify(token, "group-0-secretkey", (error, decodedToken) => {
             if (error) {
                 let message = (error.message == "jwt expired" ? "token is expired ,please login again" : "token is invalid,please recheck your token")
                 return res.status(401).send({ status: false, msg: message })
@@ -31,7 +31,7 @@ let authorisation = async function (req, res, next) {
     try {
 
         let userIdFromToken = req.decodedToken["authorId"]
-        let userIdFromClient = req.params.blogId
+        let userIdFromClient = req.params.bookId
 
         if (userIdFromClient) {
 
