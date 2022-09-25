@@ -1,10 +1,11 @@
 const bookModel = require("../models/bookmodel")
 const jwt = require('jsonwebtoken');
 const { default: mongoose } = require("mongoose");
+const { isValid } = require("../validator/validator");
 
-let authentication = function (req, res, next) {
+let authentic = function (req, res, next) {
 
-    
+
     try {
 
         let token = req.headers["x-api-key"];
@@ -26,27 +27,43 @@ let authentication = function (req, res, next) {
     }
 }
 
-let authorisation = async function (req, res, next) {
+let authorise = async function (req, res, next) {
 
     try {
 
         let userIdFromToken = req.decodedToken["authorId"]
         let userIdFromClient = req.params.bookId
+        console.log(userIdFromClient)
+        console.log(userIdFromToken)
 
         if (userIdFromClient) {
 
-            if (!mongoose.Types.ObjectId.isValid(userIdFromClient)) return res.status(400).send({ msg: "blogId is InValid", status: false })
-            let findUserDoc = await bookModel.findById(userIdFromClient)
-            if (!findUserDoc) return res.status(404).send({ msg: "No user resister", status: false })
-            if (userIdFromToken !== findUserDoc.userId.toString()) return res.status(403).send({ msg: "user is not Authorised for this operation", status: false })
+            if (!mongoose.Types.ObjectId.isValid(userIdFromClient)) return res.status(400).send({ msg: "bookId is InValid", status: false })
+            let findBookDoc = await bookModel.findById({ _id: userIdFromClient })
+            if (!findBookDoc) return res.status(404).send({ msg: "No user resister", status: false })
+            if (userIdFromToken !== findBookDoc.userId.toString()) {
+                return res.status(403).send({ msg: "user is not Authorised for this operation", status: false })
+            }
+            next()
+        } else if (req.method === "POST" && req.path === "/books") {
+
+            let userIdFromClient = req.body.userId;
+            if(!isValid(userIdFromClient)) return res.status(400).send({status : false , msg : "userId is required"})
+            if (!mongoose.Types.ObjectId.isValid(userIdFromClient)) return res.status(400).send({ msg: "user is InValid", status: false })
+            if (userIdFromToken !== userIdFromClient.toString()) {
+                return res.status(403).send({ msg: "user is not Authorised for this operation", status: false })
+
+            }
             next()
         }
-        return res.send({ status: false, msg: "Please provide BlogID" })
+        else {
+            return res.status(400).send({ status: false, msg: "Please provide BlogID" })
+        }
 
     } catch (err) {
         return res.status(500).send({ msg: err.message, status: false })
     }
 }
 
-module.exports.authentication = authentication;
-module.exports.authorisation = authorisation
+
+module.exports = { authentic, authorise }
