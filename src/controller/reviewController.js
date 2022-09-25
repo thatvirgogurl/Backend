@@ -19,7 +19,7 @@ const CreateReview = async function (req, res) {
         if (!bookId) {
             return res.status(404).send({ status: false, msg: "This bookId does not exit , Its already deleted" })
         }
-        if (!Object.keys(req.body).length == 0) {
+        if (Object.keys(req.body).length == 0) {
             return res.status(400).send({ status: false, msg: "please send Rewiew for book" })
         }
 
@@ -31,24 +31,25 @@ const CreateReview = async function (req, res) {
         if (typeof rating !== "number") {
             return res.status(400).send({ status: false, msg: "Please provide rating its required and must be in correct format" })
         }
-        if(!/^[0-9]$/.test(rating)){
+        if(!/^[1-5]$/.test(rating)){
             return res.status(400).send({status : false , msg : "rating Must be Integer"})
         }
-        if (rating < 1 || rating > 5) {
-            return res.status(400).send({ status: false, msg: "rating should be min 1 and max 5" })
-        }
+        // if (rating < 1 || rating > 5) {
+        //     return res.status(400).send({ status: false, msg: "rating should be min 1 and max 5" })
+        // }
         if (!isValid(review)) {
             return res.status(400).send({ status: false, msg: " Please provide review its required and must be in correct format" })
         }
 
         const saveData = { bookId: bookid, reviewedBy, reviewedAt: new Date(), rating, review }
 
-        let UpdatereviewInBook = await bookModel.findOneAndUpdate({ _id: bookId }, { $inc: { reviews: 1 } },{new : true})
+        let UpdatereviewInBook = await bookModel.findOneAndUpdate({ _id: bookid }, { $inc: { reviews: 1 } },{new : true}).select({__v : 0})
         let rewiewData = await reviewModel.create(saveData)
+
 
         let bookRewiewData = JSON.parse(JSON.stringify(UpdatereviewInBook))
 
-        bookRewiewData["rewiewData"] = rewiewData
+        bookRewiewData["rewiewData"] = {bookId: bookid,reviewedBy: rewiewData.reviewedBy,reviewedAt: rewiewData.reviewedAt,rating: rewiewData.rating,review: rewiewData.review}
 
 
         return res.status(201).send({ status: true, message: "Success", data: bookRewiewData })
@@ -68,7 +69,7 @@ const updateReview = async function (req, res) {
         
         if (!mongoose.Types.ObjectId.isValid(bookId)) return res.status(400).send({ status: false, message: "invalid BookId" })
 
-        const requiredBook = await bookModel.findOne({ _id: bookId, isDeleted: false })
+        const requiredBook = await bookModel.findOne({ _id: bookId, isDeleted: false }).select({__v : 0})
         if (!requiredBook) return res.status(404).send({ status: false, message: "No Such book present" })
 
         if (!mongoose.Types.ObjectId.isValid(reviewId)) return res.status(400).send({ status: false, message: "invalid reviewId" })
@@ -76,7 +77,7 @@ const updateReview = async function (req, res) {
 
         if (!requiredReview) return res.status(404).send({status: false, message: "No any review of the book"})
 
-        if(!Object.keys(req.body).length == 0) return res.status(400).send({status : false , msg : "No review Update , please provide review upadate detail"})
+        if(Object.keys(req.body).length == 0) return res.status(400).send({status : false , msg : "No review Update , please provide review upadate detail"})
 
         let { reviewedBy, rating, review } = req.body
         let obj = {reviewedAt : new Date()}
@@ -109,7 +110,7 @@ const updateReview = async function (req, res) {
             obj.review = review
         }
 
-        const updateReview =  await reviewModel.findByIdAndUpdate({_id :reviewId},{$set :obj},{new : true});
+        const updateReview =  await reviewModel.findByIdAndUpdate({_id :reviewId},{$set :obj},{new : true}).select({__v : 0 ,updatedAt : 0,createdAt : 0 , isDeleted : 0})
 
         let combineBookRewiew = JSON.parse(JSON.stringify(requiredBook))
         combineBookRewiew["reviewData"] = updateReview
@@ -125,6 +126,7 @@ const updateReview = async function (req, res) {
 const deleteReview = async function (req, res) {
 
     try {
+        
         let bookId = req.params.bookId;
         let reviewId = req.params.reviewId;
         

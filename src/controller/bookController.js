@@ -44,7 +44,7 @@ const createBooks = async function (req, res) {
         //================================ Validate Realised Date ============================//
 
         if (!releasedAt) return res.status(400).send({ status: false, msg: `realisedAt is required ` })
-        if (!(/^[12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/).test(releasedAt)) return res.status(400).send({ status: false, msg: "RealisedAt Must be in the format of DD-MM-YYYY" })
+        if (!(/^[12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/).test(releasedAt)) return res.status(400).send({ status: false, msg: "RealisedAt Must be in the format of YYYY-MM-DD" })
         if (!(moment(releasedAt).isBefore(moment().format()))) return res.status(400).send({ status: false, msg: "Please Provide Past date" })
 
         //================================== Mongo DB data Check=============================//
@@ -127,13 +127,13 @@ const getBooksById = async function (req, res) {
 
         const foundedBook = await bookModel.findOne({ _id: bookId, isDeleted: false }).select({ __v: 0, ISBN: 0 })
         console.log(foundedBook)
-
+        
         if (!foundedBook) {
             return res.status(404).send({ status: false, message: "book not found" })
         }
         const availableReviews = await reviewModel.find({ bookId: foundedBook._id, isDeleted: false })
             .select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
-        let found = JSON.parse(JSON.stringify(foundedBook))
+        let found = JSON.parse(JSON.stringify(foundedBook))  
 
         if (availableReviews.length == 0) {
             found["reviewsData"] = []
