@@ -31,12 +31,12 @@ const CreateReview = async function (req, res) {
         if (typeof rating !== "number") {
             return res.status(400).send({ status: false, msg: "Please provide rating its required and must be in correct format" })
         }
-        if(!/^[1-5]$/.test(rating)){
+        if(!/^[0-9]$/.test(rating)){
             return res.status(400).send({status : false , msg : "rating Must be Integer"})
         }
-        // if (rating < 1 || rating > 5) {
-        //     return res.status(400).send({ status: false, msg: "rating should be min 1 and max 5" })
-        // }
+        if (rating < 1 || rating > 5) {
+            return res.status(400).send({ status: false, msg: "rating should be min 1 and max 5" })
+        }
         if (!isValid(review)) {
             return res.status(400).send({ status: false, msg: " Please provide review its required and must be in correct format" })
         }
@@ -145,7 +145,7 @@ const deleteReview = async function (req, res) {
       let book = await bookModel.findByIdAndUpdate( {_id: bookId},{$inc: {reviews:-1}},{new : true})
       
       
-      return res.status(200).send({ status: true, msg: updateData });
+      return res.status(200).send({ status: true, msg: "Review Document successfully deleted" });
 
         
     }
