@@ -2,7 +2,7 @@ const isValid = (value)=>{
     if(!value) return false
     if(typeof value !== "string" || value.trim().length === 0) return false;
     return true   
-}
+}                        
 
 const isValidCharRegex = (value)=>{   
     return (/^[A-Za-z'\s]{1,}[A-Za-z\s]{0,}$/.test(value))
@@ -21,7 +21,7 @@ const isValidEmailRegex = (value)=>{
 }
 
 const isValidPhoneRegex = (value)=>{
-    return (/^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/.test(value))    
+    return (/^[6789]{1}[0-9]{9}$/.test(value))    
 }
 
 module.exports = {isValid,isValidCharRegex,isValidISBNRegex,isValidPasswordRegex,isValidEmailRegex,isValidPhoneRegex}

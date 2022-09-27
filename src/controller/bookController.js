@@ -46,7 +46,7 @@ const createBooks = async function (req, res) {
         if (!releasedAt) return res.status(400).send({ status: false, msg: `realisedAt is required ` })
         if (!(/^[12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/).test(releasedAt)) return res.status(400).send({ status: false, msg: "RealisedAt Must be in the format of YYYY-MM-DD" })
         if (!(moment(releasedAt).isBefore(moment().format()))) return res.status(400).send({ status: false, msg: "Please Provide Past date" })
-
+    
         //================================== Mongo DB data Check=============================//
 
         const isUniqueTitle = await bookModel.findOne({ title: title })
@@ -56,7 +56,7 @@ const createBooks = async function (req, res) {
         if (!isIdreferUserModel) return res.status(400).send({ status: false, msg: "userId is not from user Collection" })
 
         const isUniqueISBN = await bookModel.findOne({ ISBN: ISBN })
-        if (isUniqueISBN) return res.status(409).send({ status: false, msg: "ISBN number is already exist" })
+        if (isUniqueISBN) return res.status(400).send({ status: false, msg: "ISBN number is already exist" })
 
         //==================================End Validation=======================================//
         const data = { title, excerpt, userId, ISBN, category, subcategory, releasedAt }
@@ -74,7 +74,7 @@ const getallBook = async function (req, res) {
     try {
 
         let { userId, category, subcategory } = req.query
-        let obj = { isDeleted: false }
+        let obj = { isDeleted: false } 
         console.log(req.query)
 
         if (userId) {

@@ -25,18 +25,18 @@ const CreateReview = async function (req, res) {
 
         let { reviewedBy, rating, review } = req.body
 
-        if (!isValid(reviewedBy)) {
-            return res.status(400).send({ status: false, msg: "Please provide reviewedBy its required and must be in correct format" })
-        }
+        // if (!isValid(reviewedBy)) {
+        //     return res.status(400).send({ status: false, msg: "Please provide reviewedBy its required and must be in correct format" })
+        // }
         if (typeof rating !== "number") {
             return res.status(400).send({ status: false, msg: "Please provide rating its required and must be in correct format" })
         }
-        if(!/^[0-9]$/.test(rating)){
+        if(!/^[1-5]$/.test(rating)){
             return res.status(400).send({status : false , msg : "rating Must be Integer"})
         }
-        if (rating < 1 || rating > 5) {
-            return res.status(400).send({ status: false, msg: "rating should be min 1 and max 5" })
-        }
+        // if (rating < 1 || rating > 5) {
+        //     return res.status(400).send({ status: false, msg: "rating should be min 1 and max 5" })
+        // }
         if (!isValid(review)) {
             return res.status(400).send({ status: false, msg: " Please provide review its required and must be in correct format" })
         }
