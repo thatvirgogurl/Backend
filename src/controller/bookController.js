@@ -15,7 +15,7 @@ const createBooks = async function (req, res) {
 
         //============================== Mandatory Field Validation===========================//
 
-        let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = req.body
+        let { title, excerpt, userId, ISBN, category, subcategory, releasedAt,bookCover } = req.body
         const requestBody = ["title", "excerpt", "userId", "ISBN", "category", "subcategory"]
 
         for (element of requestBody) {
@@ -59,7 +59,7 @@ const createBooks = async function (req, res) {
         if (isUniqueISBN) return res.status(400).send({ status: false, msg: "ISBN number is already exist" })
 
         //==================================End Validation=======================================//
-        const data = { title, excerpt, userId, ISBN, category, subcategory, releasedAt }
+        const data = { title, excerpt, userId, ISBN, category, subcategory, releasedAt,bookCover }
         const saveData = await bookModel.create(data)
 
         return res.status(201).send({ status: true, msg: "Book detail is successfully registered", data: saveData })
