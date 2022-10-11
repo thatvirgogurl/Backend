@@ -24,7 +24,11 @@ const isValidPassword = function (value) {
     return false;
 };
 
-const isValidpin=/^[1-9][0-9]{5}$/
+const isValidpin=function (value) {
+    if (/^[1-9][0-9]{5}$/.test(value)) return true;
+    return false;
+};
+
 module.exports = {
     isValidMail, isValid, isValidName, isValidRequestBody, isValidfild, isValidMobile, isValidPassword,isValidpin
 }
