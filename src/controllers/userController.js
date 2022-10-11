@@ -5,79 +5,28 @@ const bcrypt = require("bcrypt")
 
 const userModel = require("../models/userModel")
 const { isValidMail, isValid, isValidName, isValidRequestBody, isValidMobile, isValidPassword, isValidpin } = require("../validator/validation")
-
-const getuserById = async function (req, res) {
-    try {
-        const userId = req.params.userId;
-    
-        if (!userId)
-            return res
-                .status(404)
-                .send({ status: false, msg: "Please send userId" });
-      //Make sure that userId in url param and in token is same
-    
-        let userDetails = await userModel.findOne({
-            _id: userId,
-            isDeleted: false,
-        });
-        if (!userDetails)
-            return res
-                .status(404)
-                .send({ status: "false", msg: "user not exist" });
-
-        let obj = {}
-
-        let objectOfuserDetails = userDetails.toObject();
-        obj = { ...objectOfuserDetails };
-        return res.status(200).send({ status: true, message: "User profile details" ,data: obj });
-    } catch (error) {
-        return res.status(500).send({ msg: error.message });
-
-    }
-}
-
- 
-
-
-
-
-
 const createUser=async function(req, res){
-
     try{
-
-        
         let files= req.files
-        
         if(files && files.length>0){
               let profileImage= await uploadFile( files[0] )
      
               let data = req.body
-
         if (!isValidRequestBody(data)) return res.status(400).send({ status: false, msg: " body cant't be empty Please enter some data." })
-
         let { fname,lname, phone, email, password, address } = data
-
-
-
         if (!isValid(fname)) return res.status(400).send({ status: false, message: "name is  required" })
         if (!isValid(lname)) return res.status(400).send({ status: false, message: "name is  required" })
         if (!isValid(email)) return res.status(400).send({ status: false, message: "mail id is required" })
         if (!isValid(phone)) return res.status(400).send({ status: false, message: "phone no. is required" })
         if (!isValid(password)) return res.status(400).send({ status: false, message: "password is required" })
-
-        
         if (!isValidName.test(fname)) return res.status(400).send({
             status: false, msg: "Enter a valid fname",
             validname: "length of fname has to be in between (3-20)  , use only String "
         })
-
         if (!isValidName.test(lname)) return res.status(400).send({
             status: false, msg: "Enter a valid lname",
             validname: "length of lname has to be in between (3-20)  , use only String "
         })
-
-
         if (!isValidMail.test(email)) return res.status(406).send({
             status: false, msg: "email id is not valid",
             ValidMail: "email must be in for e.g. xyz@abc.com format."
@@ -93,14 +42,12 @@ const createUser=async function(req, res){
             if (unique.phone == phone.trim()) {
                 return res.status(400).send({ message: `${phone} This phone No. is  already exist` }) //instead of 400 we can also use 409 for conflict
             } else { return res.status(400).send({ message: `${email}:--This maiId is already exist  ` }) } //instead of 400 we can also use 409 for conflict
-
         }
         if (!isValidPassword(password)) return res.status(400).send({
             status: false, message: "enter valid password  ",
             ValidPassWord: "passWord in between(8-15)& must be contain ==> upperCase,lowerCase,specialCharecter & Number"
         })
         const hash = await bcrypt.hash(password, 10);
-        
         if(data.address){
             address=JSON.parse(address)
             const  {shipping,billing}=address
@@ -143,12 +90,74 @@ const createUser=async function(req, res){
     }
     
 }
+const getuserById = async function (req, res) {
+    try {
+        const userId = req.arams.userId;
+
+        if (!userId)
+            return res
+                .status(404)
+                .send({ status: false, msg: "Please send userId" });
+        
+        let userDetails = await userModel.findOne({
+            _id: userId,
+            isDeleted: false,
+        });
+        if (!userDetails)
+            return res
+                .status(404)
+                .send({ status: "false", msg: "user not exist" });
+
+        let obj = {}
+
+        let objectOfuserDetails = userDetails.toObject();
+        obj = { ...objectOfuserDetails };
+        return res.status(200).send({ status: true, message: "User profile details", data: obj });
+    } catch (error) {
+        return res.status(500).send({ msg: error.message });
+
+    }
+}
+
+
+
+
+const loginUser = async function (req, res) {
+
+    try {
+        if (!isValidRequestBody(req.body)) return res.status(400).send({ status: false, message: "request body can't be empty enter some data." })
+        let email = req.body.email
+        if (!isValid(email)) return res.status(400).send({ status: false, message: "email required" })
+        if (!isValidMail.test(email)) return res.status(400).send({ status: false, message: "enter a valid email" })
+
+        let password = req.body.password
+        if (!isValid(password)) return res.status(400).send({ status: false, message: "password is required" })
+
+        let verifyUser = await userModel.findOne({ email: email })
+
+        if (verifyUser) {
+            const result = await bcrypt.compare(password, verifyUser.password);
+            if(!result)  return res.status(400).send({ status: false, message: "password  is incorrect" })
+        }else{
+            return res.status(400).send({ status: false, message: "email  is incorrect" })
+        }
+
+        let token = jwt.sign(
+            {userId:verifyUser._id.toString()},
+            "#@$SamMon#TuRi14",
+             { expiresIn: "24h" }
+        );
+        res.status(201).send({ status: true, message: "User login successfull", data:{userId:verifyUser["_id"],token:token }})
+    }
+    catch (error) {
+        return res.status(500).send({ status: false, message: error.message })
+    }
+};
 
 
 
 
 
 
-
-module.exports = { createUser, getuserById }
+module.exports={createUser,loginUser,getuserById}
 
