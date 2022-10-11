@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createUser } = require('../controllers/userController')
+const { createUser,loginUser } = require('../controllers/userController')
 
 
 //..............................Test API.........................//
@@ -13,7 +13,7 @@ router.get("/test-me" , function(req,res){
 //........................................User API............................................//
 
 router.post('/register', createUser)
-
+router.post('/login', loginUser)
 
 
 

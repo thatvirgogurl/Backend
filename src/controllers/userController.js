@@ -113,6 +113,41 @@ const createUser=async function(req, res){
 
 
 
+const loginUser = async function (req, res) {
+
+    try {
+        if (!isValidRequestBody(req.body)) return res.status(400).send({ status: false, message: "request body can't be empty enter some data." })
+        let email = req.body.email
+        if (!isValid(email)) return res.status(400).send({ status: false, message: "email required" })
+        if (!isValidMail.test(email)) return res.status(400).send({ status: false, message: "enter a valid email" })
+
+        let password = req.body.password
+        if (!isValid(password)) return res.status(400).send({ status: false, message: "password is required" })
+
+        let verifyUser = await userModel.findOne({ email: email })
+
+        if (verifyUser) {
+            const result = await bcrypt.compare(password, verifyUser.password);
+            if(!result)  return res.status(400).send({ status: false, message: "password  is incorrect" })
+        }else{
+            return res.status(400).send({ status: false, message: "email  is incorrect" })
+        }
+
+        let token = jwt.sign(
+            {userId:verifyUser._id.toString()},
+            "#@$SamMon#TuRi14",
+             { expiresIn: "24h" }
+        );
+        res.status(201).send({ status: true, message: "User login successfull", data:{userId:verifyUser["_id"],token:token }})
+    }
+    catch (error) {
+        return res.status(500).send({ status: false, message: error.message })
+    }
+};
 
 
-module.exports={createUser}
+
+
+
+
+module.exports={createUser,loginUser}
