@@ -2,9 +2,10 @@
 const jwt = require("jsonwebtoken")
 const { uploadFile } = require("./aws3")
 const bcrypt = require("bcrypt")
-
+const {validBody,validName,validMail,validPhone,validPassword,validAddress} = require('../validator/validator')
 const userModel = require("../models/userModel")
 const { isValidMail, isValid, isValidName, isValidRequestBody, isValidMobile, isValidPassword, isValidpin } = require("../validator/validation")
+
 const createUser=async function(req, res){
     try{
         let files= req.files
@@ -12,6 +13,8 @@ const createUser=async function(req, res){
               let profileImage= await uploadFile( files[0] )
      
               let data = req.body
+            //   console.log(req.body)
+              console.log(profileImage)
         if (!isValidRequestBody(data)) return res.status(400).send({ status: false, msg: " body cant't be empty Please enter some data." })
         let { fname,lname, phone, email, password, address } = data
         if (!isValid(fname)) return res.status(400).send({ status: false, message: "name is  required" })
@@ -90,6 +93,7 @@ const createUser=async function(req, res){
     }
     
 }
+
 const getuserById = async function (req, res) {
     try {
         const userId = req.arams.userId;
@@ -118,9 +122,6 @@ const getuserById = async function (req, res) {
 
     }
 }
-
-
-
 
 const loginUser = async function (req, res) {
 
@@ -154,10 +155,44 @@ const loginUser = async function (req, res) {
     }
 };
 
+const updateUser = async function (req,res){
+    try{
+        let data = req.body
+        let userId = req.params.userId
+        if(validBody(data)) return res.status(400).send({status:false,message:'Please provide something to update'})
+        let {fname,lname,email,phone,password,address} = data
+        let update = {}
+        if(fname){
+            if(validName(fname)) return res.status(400).send({status:false,message:'Please provide valid fname'})
+            update.fname = fname
+        }
+        if(lname){
+            if(validName(lname)) return res.status(400).send({status:false,message:'Please provide valid lname'})
+            update.lname = lname
+        }
+        if(email){
+            if(validMail(fname)) return res.status(400).send({status:false,message:'Please provide valid email'})
+            update.email = email
+        }
+        if(phone){
+            if(validPhone(phone)) return res.status(400).send({status:false,message:'Please provide valid mobile no.'})
+            update.phone = phone
+        }
+        if(password){
+            if(validPassword(password)) return res.status(400).send({status:false,message:'Please provide valid password'})
+            update.password = password
+        }
+        if(address){
+            if(validAddress(JSON.pase(address))) return res.status(400).send({status:false,message:'Please provide valid password'})
+            update.address = address
+        }
+        let updatedUser = await userModel.updateMany({_id:userId},{$set:update},{new:true})
+        return res.status(201).send({ status : true,message:'User profile updated',data : updatedUser})
+    }
+    catch(error){
+        return res.status(500).send(error.message)
+    }
+}
 
 
-
-
-
-module.exports={createUser,loginUser,getuserById}
-
+module.exports={createUser,loginUser,getuserById,updateUser}
