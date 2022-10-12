@@ -182,7 +182,7 @@ const updateUser = async function (req, res) {
             update.lname = lname
         }
         if (email) {
-            if (validMail(fname)) return res.status(400).send({ status: false, message: 'Please provide valid email' })
+            if (!validMail(email)) return res.status(400).send({ status: false, message: 'Please provide valid email' })
             let emailExist = await userModel.findOne({ email: email })
             if (emailExist) return res.status(400).send({ status: false, message: 'email is already exist' })
             update.email = email
@@ -198,12 +198,12 @@ const updateUser = async function (req, res) {
             update.phone = phone
         }
         if (password) {
-            if (validPassword(password)) return res.status(400).send({ status: false, message: 'Please provide valid password' })
+            if (!validPassword(password)) return res.status(400).send({ status: false, message: 'Please provide valid password' })
             let hash = await bcrypt.hash(password, 10);
             update.password = hash
         }
         if (address) {
-            if (validAddress(JSON.pase(address))) return res.status(400).send({ status: false, message: 'Please provide valid password' })
+            if (!validAddress(JSON.pase(address))) return res.status(400).send({ status: false, message: 'Please provide valid password' })
             update.address = address
         }
         let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, { $set: update }, { new: true })
