@@ -159,6 +159,7 @@ const updateUser = async function (req,res){
     try{
         let data = req.body
         let userId = req.params.userId
+        let files= req.files
         if(validBody(data)) return res.status(400).send({status:false,message:'Please provide something to update'})
         let {fname,lname,email,phone,password,address} = data
         let update = {}
@@ -174,13 +175,18 @@ const updateUser = async function (req,res){
             if(validMail(fname)) return res.status(400).send({status:false,message:'Please provide valid email'})
             update.email = email
         }
+        if(files){
+            let profileImage= await uploadFile( files[0] )
+            update.profileImage = profileImage
+        }
         if(phone){
             if(validPhone(phone)) return res.status(400).send({status:false,message:'Please provide valid mobile no.'})
             update.phone = phone
         }
         if(password){
             if(validPassword(password)) return res.status(400).send({status:false,message:'Please provide valid password'})
-            update.password = password
+            let hash = await bcrypt.hash(password, 10);
+            update.password = hash
         }
         if(address){
             if(validAddress(JSON.pase(address))) return res.status(400).send({status:false,message:'Please provide valid password'})
