@@ -14,7 +14,7 @@ let authentication = function (req, res, next) {
                 return res.status(401).send({ status: false, msg: message })
             }
             //console.log(decodedToken)
-            req.decodedToken = decodedToken;
+            req.decodedToken = decodedToken.userId;
             next();
         });
 
@@ -24,27 +24,6 @@ let authentication = function (req, res, next) {
     }
 }
 
-let authorisation = async function (req, res, next) {
-
-    try {
-
-        let userIdFromToken = req.decodedToken["userId"]
-        let userIdFromClient = req.params.userId
-
-        if (userIdFromClient) {
-
-            if (!mongoose.Types.ObjectId.isValid(userIdFromClient)) return res.status(400).send({ msg: "userId is InValid", status: false })
-            let findUserDoc = await userModel.findById(userIdFromClient)
-            if (!findUserDoc) return res.status(404).send({ msg: "No user resister", status: false })
-            if (userIdFromToken !== findUserDoc.userId.toString()) return res.status(403).send({ msg: "user is not Authorised for this operation", status: false })
-            next()
-        }
-        return res.send({ status: false, msg: "Please provide user ID" })
-
-    } catch (err) {
-        return res.status(500).send({ msg: err.message, status: false })
-    }
-}
 
 
-module.exports = { authentication, authorisation }
+module.exports = { authentication}

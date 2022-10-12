@@ -2,21 +2,19 @@
 const jwt = require("jsonwebtoken")
 const { uploadFile } = require("./aws3")
 const bcrypt = require("bcrypt")
-const {validBody,validName,validMail,validPhone,validPassword,validAddress} = require('../validator/validator')
+const mongoose = require('mongoose')
+const { validBody, validName, validMail, validPhone, validPassword, validAddress } = require('../validator/validator')
 const userModel = require("../models/userModel")
 const { isValidMail, isValid, isValidName, isValidRequestBody, isValidMobile, isValidPassword, isValidpin } = require("../validator/validation")
 
-const createUser=async function(req, res){
-    try{
-        let files= req.files
-        if(files && files.length>0){
-              let profileImage= await uploadFile( files[0] )
-     
-              let data = req.body
-            //   console.log(req.body)
-              console.log(profileImage)
+const createUser = async function (req, res) {
+    try {
+
+        let data = req.body
+
+
         if (!isValidRequestBody(data)) return res.status(400).send({ status: false, msg: " body cant't be empty Please enter some data." })
-        let { fname,lname, phone, email, password, address } = data
+        let { fname, lname, phone, email, password, address } = data
         if (!isValid(fname)) return res.status(400).send({ status: false, message: "name is  required" })
         if (!isValid(lname)) return res.status(400).send({ status: false, message: "name is  required" })
         if (!isValid(email)) return res.status(400).send({ status: false, message: "mail id is required" })
@@ -51,77 +49,53 @@ const createUser=async function(req, res){
             ValidPassWord: "passWord in between(8-15)& must be contain ==> upperCase,lowerCase,specialCharecter & Number"
         })
         const hash = await bcrypt.hash(password, 10);
-        if(data.address){
-            address=JSON.parse(address)
-            const  {shipping,billing}=address
-            if(!isValid(shipping.street)){
-                return res.status(400).send({status : false, message : "Shipping : street feild is Mandatory"}) 
+        if (data.address) {
+            address = JSON.parse(address)
+            const { shipping, billing } = address
+            if (!isValid(shipping.street)) {
+                return res.status(400).send({ status: false, message: "Shipping : street feild is Mandatory" })
             }
-            if(!isValid(shipping.city)){
-                return res.status(400).send({status : false, message : "Shipping : city feild is Mandatory"}) 
+            if (!isValid(shipping.city)) {
+                return res.status(400).send({ status: false, message: "Shipping : city feild is Mandatory" })
             }
-            if(!isValidpin(shipping.pincode)){
-                return res.status(400).send({status : false, message : "Shipping : pincode feild is Mandatory"}) 
+            if (!isValidpin(shipping.pincode)) {
+                return res.status(400).send({ status: false, message: "Shipping : pincode feild is Mandatory" })
             }
-            if(!isValid(billing.street)){
-                return res.status(400).send({status : false, message : "Shipping : street feild is Mandatory"}) 
+            if (!isValid(billing.street)) {
+                return res.status(400).send({ status: false, message: "Shipping : street feild is Mandatory" })
             }
-            if(!isValid(billing.city)){
-                return res.status(400).send({status : false, message : "Shipping : city feild is Mandatory"}) 
+            if (!isValid(billing.city)) {
+                return res.status(400).send({ status: false, message: "Shipping : city feild is Mandatory" })
             }
-            if(!isValidpin(billing.pincode)){
-                return res.status(400).send({status : false, message : "Shipping : pincode feild is Mandatory"}) 
+            if (!isValidpin(billing.pincode)) {
+                return res.status(400).send({ status: false, message: "Shipping : pincode feild is Mandatory" })
             }
-        }else{
+
+        } else {
             return res.status(400).send({ status: false, msg: " Address is mandatory" })
+        }
+        let files = req.files
+        if (files && files.length > 0) {
+            var profileImage = await uploadFile(files[0])
+        }
+        else {
+            return res.status(400).send({ msg: "No file found" })
         }
 
         const userData = {
-            fname,lname,  email,phone, password:hash, address,profileImage
+            fname, lname, email, phone, password: hash, address, profileImage
         }
         let savedData = await userModel.create(userData)
         res.status(201).send({ status: true, message: "Success", data: savedData })
 
-        }
-        else{
-            res.status(400).send({ msg: "No file found" })
-        }
-        
     }
-    catch(err){
-        res.status(500).send({msg: err.message})
+    catch (err) {
+        res.status(500).send({ msg: err.message })
     }
-    
+
 }
 
-const getuserById = async function (req, res) {
-    try {
-        const userId = req.arams.userId;
 
-        if (!userId)
-            return res
-                .status(404)
-                .send({ status: false, msg: "Please send userId" });
-        
-        let userDetails = await userModel.findOne({
-            _id: userId,
-            isDeleted: false,
-        });
-        if (!userDetails)
-            return res
-                .status(404)
-                .send({ status: "false", msg: "user not exist" });
-
-        let obj = {}
-
-        let objectOfuserDetails = userDetails.toObject();
-        obj = { ...objectOfuserDetails };
-        return res.status(200).send({ status: true, message: "User profile details", data: obj });
-    } catch (error) {
-        return res.status(500).send({ msg: error.message });
-
-    }
-}
 
 const loginUser = async function (req, res) {
 
@@ -138,71 +112,107 @@ const loginUser = async function (req, res) {
 
         if (verifyUser) {
             const result = await bcrypt.compare(password, verifyUser.password);
-            if(!result)  return res.status(400).send({ status: false, message: "password  is incorrect" })
-        }else{
+            if (!result) return res.status(400).send({ status: false, message: "password  is incorrect" })
+        } else {
             return res.status(400).send({ status: false, message: "email  is incorrect" })
         }
 
         let token = jwt.sign(
-            {userId:verifyUser._id.toString()},
+            { userId: verifyUser._id.toString() },
             "#@$SamMon#TuRi14",
-             { expiresIn: "24h" }
+            { expiresIn: "24h" }
         );
-        res.status(201).send({ status: true, message: "User login successfull", data:{userId:verifyUser["_id"],token:token }})
+        res.status(201).send({ status: true, message: "User login successfull", data: { userId: verifyUser["_id"], token: token } })
     }
     catch (error) {
         return res.status(500).send({ status: false, message: error.message })
     }
 };
 
-const updateUser = async function (req,res){
-    try{
+
+
+const getuserById = async function (req, res) {
+    try {
+        const userId = req.params.userId;
+
+        if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "please provied a valied userId" })
+
+        let userDetails = await userModel.findById(userId);
+        if (!userDetails)
+            return res
+                .status(404)
+                .send({ status: "false", msg: "user not exist" });
+
+        let obj = {}
+
+        let objectOfuserDetails = userDetails.toObject();
+        obj = { ...objectOfuserDetails };
+        return res.status(200).send({ status: true, message: "User profile details", data: obj });
+    } catch (error) {
+        return res.status(500).send({ msg: error.message });
+
+    }
+}
+
+
+
+const updateUser = async function (req, res) {
+    try {
         let data = req.body
         let userId = req.params.userId
-        let files= req.files
-        if(validBody(data)) return res.status(400).send({status:false,message:'Please provide something to update'})
-        let {fname,lname,email,phone,password,address} = data
+
+        if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "please provied a valied userId" })
+
+        //-------------------------------Authorizition-----------------------------//
+
+        if (userId != req.decodedToken) return res.status(403).send({ status: false, message: 'Un-Authorized User' })
+
+        //-------------------------------Authorizition-----------------------------//
+
+        let files = req.files
+        if (!validBody(data)) return res.status(400).send({ status: false, message: 'Please provide something to update' })
+        let { fname, lname, email, phone, password, address } = data
         let update = {}
-        if(fname){
-            if(validName(fname)) return res.status(400).send({status:false,message:'Please provide valid fname'})
+        if (fname) {
+            if (validName(fname)) return res.status(400).send({ status: false, message: 'Please provide valid fname' })
             update.fname = fname
         }
-        if(lname){
-            if(validName(lname)) return res.status(400).send({status:false,message:'Please provide valid lname'})
+        if (lname) {
+            if (validName(lname)) return res.status(400).send({ status: false, message: 'Please provide valid lname' })
             update.lname = lname
         }
-        if(email){
-            if(validMail(fname)) return res.status(400).send({status:false,message:'Please provide valid email'})
-            let emailExist = await userModel.findOne({email:email})
-            if(emailExist) return res.status(400).send({status:false,message:'email is already exist'})
+        if (email) {
+            if (validMail(fname)) return res.status(400).send({ status: false, message: 'Please provide valid email' })
+            let emailExist = await userModel.findOne({ email: email })
+            if (emailExist) return res.status(400).send({ status: false, message: 'email is already exist' })
             update.email = email
         }
-        if(files){
-            let profileImage= await uploadFile( files[0] )
+        if (files && files.length > 0) {
+            let profileImage = await uploadFile(files[0])
             update.profileImage = profileImage
         }
-        if(phone){
-            if(validPhone(phone)) return res.status(400).send({status:false,message:'Please provide valid mobile no.'})
-            let phoneExist = await userModel.findOne({phone:phone})
-            if(phoneExist) return res.status(400).send({status:false,message:'mobile no. is already exist'})
+        if (phone) {
+            if (!validPhone(phone)) return res.status(400).send({ status: false, message: 'Please provide valid mobile no.' })
+            let phoneExist = await userModel.findOne({ phone: phone })
+            if (phoneExist) return res.status(400).send({ status: false, message: 'mobile no. is already exist' })
             update.phone = phone
         }
-        if(password){
-            if(validPassword(password)) return res.status(400).send({status:false,message:'Please provide valid password'})
+        if (password) {
+            if (validPassword(password)) return res.status(400).send({ status: false, message: 'Please provide valid password' })
             let hash = await bcrypt.hash(password, 10);
             update.password = hash
         }
-        if(address){
-            if(validAddress(JSON.pase(address))) return res.status(400).send({status:false,message:'Please provide valid password'})
+        if (address) {
+            if (validAddress(JSON.pase(address))) return res.status(400).send({ status: false, message: 'Please provide valid password' })
             update.address = address
         }
-        let updatedUser = await userModel.updateMany({_id:userId},{$set:update},{new:true})
-        return res.status(201).send({ status : true,message:'User profile updated',data : updatedUser})
+        let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, { $set: update }, { new: true })
+        return res.status(200).send({ status: true, message: 'User profile updated', data: updatedUser })
     }
-    catch(error){
+    catch (error) {
         return res.status(500).send(error.message)
     }
 }
 
 
-module.exports={createUser,loginUser,getuserById,updateUser}
+module.exports = { createUser, loginUser, getuserById, updateUser }
