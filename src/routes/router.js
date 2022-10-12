@@ -20,13 +20,13 @@ router.get("/test-me" , function(req,res){
 router.post('/register', createUser)
 
 
-router.get("user/:userId/profile",authentication,getuserById)
+router.get("/user/:userId/profile",authentication,getuserById)
 
 router.post('/login', loginUser)
 
-router.put("user/:userId/profile",authentication,authorisation,updateUser)
+router.put("/user/:userId/profile",authentication,authorisation,updateUser)
 
-//  router.all("/*", (req, res) => { res.status(400).send({ status: false, message: "Endpoint is not correct plese provide a proper end-point" }) })
+ router.all("/*", (req, res) => { res.status(400).send({ status: false, message: "Endpoint is not correct plese provide a proper end-point" }) })
 
 
 
