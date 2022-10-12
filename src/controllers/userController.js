@@ -2,25 +2,23 @@
 const jwt = require("jsonwebtoken")
 const { uploadFile } = require("./aws3")
 const bcrypt = require("bcrypt")
-const mongoose = require('mongoose')
 const {validBody,validName,validMail,validPhone,validPassword,validAddress} = require('../validator/validator')
 const userModel = require("../models/userModel")
 const { isValidMail, isValid, isValidName, isValidRequestBody, isValidMobile, isValidPassword, isValidpin } = require("../validator/validation")
 
-
-
-
-
-
 const createUser=async function(req, res){
     try{
-        
+        let files= req.files
+        if(files && files.length>0){
+              let profileImage= await uploadFile( files[0] )
      
               let data = req.body
+            //   console.log(req.body)
+              console.log(profileImage)
         if (!isValidRequestBody(data)) return res.status(400).send({ status: false, msg: " body cant't be empty Please enter some data." })
         let { fname,lname, phone, email, password, address } = data
-        if (!isValid(fname)) return res.status(400).send({ status: false, message: "fname is  required" })
-        if (!isValid(lname)) return res.status(400).send({ status: false, message: "lname is  required" })
+        if (!isValid(fname)) return res.status(400).send({ status: false, message: "name is  required" })
+        if (!isValid(lname)) return res.status(400).send({ status: false, message: "name is  required" })
         if (!isValid(email)) return res.status(400).send({ status: false, message: "mail id is required" })
         if (!isValid(phone)) return res.status(400).send({ status: false, message: "phone no. is required" })
         if (!isValid(password)) return res.status(400).send({ status: false, message: "password is required" })
@@ -32,12 +30,12 @@ const createUser=async function(req, res){
             status: false, msg: "Enter a valid lname",
             validname: "length of lname has to be in between (3-20)  , use only String "
         })
-        if (!isValidMail.test(email)) return res.status(400).send({
+        if (!isValidMail.test(email)) return res.status(406).send({
             status: false, msg: "email id is not valid",
             ValidMail: "email must be in for e.g. xyz@abc.com format."
         })
 
-        if (!isValidMobile.test(phone)) return res.status(400).send({
+        if (!isValidMobile.test(phone)) return res.status(406).send({
             status: false, message: "mobile no. is not valid",
             ValidMobile: "it must be 10 digit Number & it should be a indian mobile no."
         })
@@ -66,24 +64,17 @@ const createUser=async function(req, res){
                 return res.status(400).send({status : false, message : "Shipping : pincode feild is Mandatory"}) 
             }
             if(!isValid(billing.street)){
-                return res.status(400).send({status : false, message : "billing : street feild is Mandatory"}) 
+                return res.status(400).send({status : false, message : "Shipping : street feild is Mandatory"}) 
             }
             if(!isValid(billing.city)){
-                return res.status(400).send({status : false, message : "billing : city feild is Mandatory"}) 
+                return res.status(400).send({status : false, message : "Shipping : city feild is Mandatory"}) 
             }
             if(!isValidpin(billing.pincode)){
-                return res.status(400).send({status : false, message : "billing : pincode feild is Mandatory"}) 
+                return res.status(400).send({status : false, message : "Shipping : pincode feild is Mandatory"}) 
             }
         }else{
             return res.status(400).send({ status: false, msg: " Address is mandatory" })
         }
-        let files= req.files
-        if(files && files.length>0){
-              var profileImage= await uploadFile( files[0] )
-            }
-              else{
-                 return res.status(400).send({ msg: "No profileImage found" })
-              }
 
         const userData = {
             fname,lname,  email,phone, password:hash, address,profileImage
@@ -91,15 +82,46 @@ const createUser=async function(req, res){
         let savedData = await userModel.create(userData)
         res.status(201).send({ status: true, message: "Success", data: savedData })
 
-        
+        }
+        else{
+            res.status(400).send({ msg: "No file found" })
+        }
         
     }
     catch(err){
-        res.status(500).send({msg: err})
+        res.status(500).send({msg: err.message})
     }
     
 }
 
+const getuserById = async function (req, res) {
+    try {
+        const userId = req.arams.userId;
+
+        if (!userId)
+            return res
+                .status(404)
+                .send({ status: false, msg: "Please send userId" });
+        
+        let userDetails = await userModel.findOne({
+            _id: userId,
+            isDeleted: false,
+        });
+        if (!userDetails)
+            return res
+                .status(404)
+                .send({ status: "false", msg: "user not exist" });
+
+        let obj = {}
+
+        let objectOfuserDetails = userDetails.toObject();
+        obj = { ...objectOfuserDetails };
+        return res.status(200).send({ status: true, message: "User profile details", data: obj });
+    } catch (error) {
+        return res.status(500).send({ msg: error.message });
+
+    }
+}
 
 const loginUser = async function (req, res) {
 
@@ -126,38 +148,12 @@ const loginUser = async function (req, res) {
             "#@$SamMon#TuRi14",
              { expiresIn: "24h" }
         );
-        res.status(200).send({ status: true, message: "User login successfull", data:{userId:verifyUser["_id"],token:token }})
+        res.status(201).send({ status: true, message: "User login successfull", data:{userId:verifyUser["_id"],token:token }})
     }
     catch (error) {
         return res.status(500).send({ status: false, message: error.message })
     }
 };
-
-
-
-
-const getuserById = async function (req, res) {
-    try {
-        const userId = req.params.userId;
-        if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "please provied a correct UserId" })
-        
-        let userDetails = await userModel.findById(userId);
-        if (!userDetails)
-            return res
-                .status(404)
-                .send({ status: "false", msg: "user not exist" });
-
-        let obj = {}
-
-        let objectOfuserDetails = userDetails.toObject();
-        obj = { ...objectOfuserDetails };
-        return res.status(200).send({ status: true, message: "User profile details", data: obj });
-    } catch (error) {
-        return res.status(500).send({ msg: error.message });
-
-    }
-}
-
 
 const updateUser = async function (req,res){
     try{
@@ -177,6 +173,8 @@ const updateUser = async function (req,res){
         }
         if(email){
             if(validMail(fname)) return res.status(400).send({status:false,message:'Please provide valid email'})
+            let emailExist = await userModel.findOne({email:email})
+            if(emailExist) return res.status(400).send({status:false,message:'email is already exist'})
             update.email = email
         }
         if(files){
@@ -185,6 +183,8 @@ const updateUser = async function (req,res){
         }
         if(phone){
             if(validPhone(phone)) return res.status(400).send({status:false,message:'Please provide valid mobile no.'})
+            let phoneExist = await userModel.findOne({phone:phone})
+            if(phoneExist) return res.status(400).send({status:false,message:'mobile no. is already exist'})
             update.phone = phone
         }
         if(password){
