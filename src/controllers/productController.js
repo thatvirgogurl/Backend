@@ -17,6 +17,7 @@ module.exports={
         let { title, description,price,isFreeShipping,style,availableSizes,installments} = data
 
         if (!isValid(title)) return res.status(400).send({ status: false, message: "Title is required" })
+        if(!(/^[A-Za-z]+((\s)?[A-Za-z]+)*$/).test(title))  return res.status(400).send({ status: false, message: "Title " })
         if (!isValid(description)) return res.status(400).send({ status: false, message: "Title is required" })
         title=title.trim()
         const unique = await productModel.findOne({ title: title })
@@ -91,6 +92,7 @@ let files = req.files
         if(!products) return res.status(400).send({status:false,message:"product not found"})
         return res.status(200).send({ status: true, message: "Products details", data:products})        
     }
+    
     catch(err){
         return res.status(500).send({status:false,message:error.message})
     }
