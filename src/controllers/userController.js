@@ -1,4 +1,3 @@
-
 const jwt = require("jsonwebtoken")
 const { uploadFile } = require("./aws3")
 const bcrypt = require("bcrypt")
@@ -96,7 +95,6 @@ const createUser = async function (req, res) {
 }
 
 
-
 const loginUser = async function (req, res) {
 
     try {
@@ -130,7 +128,6 @@ const loginUser = async function (req, res) {
 };
 
 
-
 const getuserById = async function (req, res) {
     try {
         const userId = req.params.userId;
@@ -155,7 +152,6 @@ const getuserById = async function (req, res) {
 }
 
 
-
 const updateUser = async function (req, res) {
     try {
         let data = req.body
@@ -170,7 +166,7 @@ const updateUser = async function (req, res) {
         //-------------------------------Authorizition-----------------------------//
 
         let files = req.files
-        if (!validBody(data)) return res.status(400).send({ status: false, message: 'Please provide something to update' })
+        if (!validBody(data) && files.length < 0) return res.status(400).send({ status: false, message: 'Please provide something to update' })
         let { fname, lname, email, phone, password, address } = data
         let update = {}
         if (fname) {

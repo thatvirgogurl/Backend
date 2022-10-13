@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { authentication, authorisation }=require('../middleware/auth.js')
-const { createUser, getuserById ,loginUser,updateUser
+const { authentication }=require('../middleware/auth.js')
+const { createUser, getuserById ,loginUser,updateUser} = require('../controllers/userController')
 
-} = require('../controllers/userController')
-
-
+const {createproduct}=require('../controllers/productController')
 
 
 //..............................Test API.........................//
@@ -25,6 +23,19 @@ router.get("/user/:userId/profile",authentication,getuserById)
 router.post('/login', loginUser)
 
 router.put("/user/:userId/profile",authentication,updateUser)
+
+
+
+
+//----------------------------------------Product API--------------------------//
+
+router.post('/products', createproduct)
+
+
+
+
+
+
 
  router.all("/*", (req, res) => { res.status(400).send({ status: false, message: "Endpoint is not correct plese provide a proper end-point" }) })
 

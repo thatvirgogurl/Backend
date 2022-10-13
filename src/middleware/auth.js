@@ -1,6 +1,6 @@
-const userModel = require("../models/userModel")
+
 const jwt = require('jsonwebtoken');
-const { default: mongoose } = require("mongoose");
+
 
 let authentication = function (req, res, next) {
     try {
