@@ -17,8 +17,9 @@ module.exports={
         let { title, description,price,isFreeShipping,style,availableSizes,installments} = data
 
         if (!isValid(title)) return res.status(400).send({ status: false, message: "Title is required" })
-        if(!(/^[A-Za-z]+((\s)?[A-Za-z]+)*$/).test(title))  return res.status(400).send({ status: false, message: "Title " })
-        if (!isValid(description)) return res.status(400).send({ status: false, message: "Title is required" })
+        if(!(/^[a-zA-Z0-9.%$#@*& ]{3,20}$/).test(title))  return res.status(400).send({ status: false, message: "Title length should not be greater than 20" })
+        if (!isValid(description)) return res.status(400).send({ status: false, message: "description is required" })
+        if(!(/^[a-zA-Z0-9.%$#@*& ]{10,40}$/).test(description))  return res.status(400).send({ status: false, message: "description length in between 10-40" })
         title=title.trim()
         const unique = await productModel.findOne({ title: title })
         if (unique){
@@ -56,9 +57,8 @@ let files = req.files
             obj.productImage=productImage
         }
         else {
-            return res.status(400).send({ msg: "No file found" })
+            return res.status(400).send({status: false, msg: "No file found" })
         }
-        //obj.deletedAt=Date.now()
        obj.currencyFormat="₹"
        obj.currencyId="INR"
 
@@ -74,7 +74,7 @@ let files = req.files
  getProducts : async function(req,res){
     try{
         let data = req.query
-        let {size,name,priceLessThan,priceGreaterThan} = data
+        let {size,name,priceLessThan,priceGreaterThan,priceSort} = data
         let condition = {isDeleted : false}
         if(size){
             condition.availableSizes = size
@@ -83,18 +83,41 @@ let files = req.files
             condition.title = name
         }
         if(priceLessThan){
-            condition.price = {$lt:priceLessThan}
+            if(priceLessThan){
+                condition.price = {$gt:priceGreaterThan,$lt:priceLessThan}
+            }else{
+                condition.price = {$lt:priceLessThan}
+            }
         }
         if(priceGreaterThan){
-            condition.price = {$gt:priceGreaterThan}
+             condition.price = {$gt:priceGreaterThan}  
         }
-        let products = await productModel.find(condition).sort({price:1})
-        if(!products) return res.status(400).send({status:false,message:"product not found"})
+        let products = await productModel.find(condition)
+        if(products.length==0) return res.status(400).send({status:false,message:"product not found"})
+        if(priceSort){
+            if(priceSort==1){
+                products.sort((a, b) => {
+                    let fa = a.price
+                    fb = b.price
+                    if (fa < fb) return -1;
+                    if (fa > fb) return 1;
+                    return 0
+                })
+            }else if(priceSort==-1){
+                products.sort((a, b) => {
+                    let fa = a.price
+                    fb = b.price
+                    if (fa < fb) return 1;
+                    if (fa > fb) return -1;
+                    return 0
+                })
+            }
+        }
         return res.status(200).send({ status: true, message: "Products details", data:products})        
     }
-    
+
     catch(err){
-        return res.status(500).send({status:false,message:error.message})
+        return res.status(500).send({status:false,message:err.message})
     }
 },
 
@@ -108,7 +131,7 @@ let files = req.files
         return res.status(200).send({ status: true, message: "Product details", data:product})
     }
     catch(err){
-        return res.status(500).send({status:false,message:error.message})
+        return res.status(500).send({status:false,message:err.message})
     }
 },
  updateProduct:async function(req,res){
@@ -132,7 +155,7 @@ let files = req.files
 
         if (title) {
             if (!isValidfild(title)) return res.status(400).send({ status: false, msg: "title it's must be string" })
-            const isUniqueTitle = await bookModel.findOne({ title: title })
+            const isUniqueTitle = await productModel.findOne({ title: title })
             if (isUniqueTitle) return res.status(409).send({ status: false, msg: "Title is already Exist" })
             obj["title"] = title
         }
@@ -192,18 +215,18 @@ let files = req.files
 
 },
 
- deleteProduct :async function(re,res){
+ deleteProduct :async function(req,res){
     try{
         let productId = req.params.productId
         if(!mongoose.isValidObjectId(productId)) return res.status(400).send({status:false,message:"Invalid product Id"})
         let condition = {isDeleted : false,_id:productId}
-        let product = await productModel.findOne(condition)
+        
+       let product= await productModel.findOneAndUpdate(condition,{$set:{isDeleted:true,deletedAt:new Date()}})
         if(!product) return res.status(400).send({status:false,message:"product not found"})
-        await productModel.findOneAndUpdate(condition,{$set:{isDeleted:true,deletedAt:new Date()}})
         return res.status(200).send({ status: true, message: "Product deleted"})
     }
     catch(err){
-        return res.status(500).send({status:false,message:error.message})
+        return res.status(500).send({status:false,message:err.message})
     }
 }
 

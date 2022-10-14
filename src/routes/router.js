@@ -32,8 +32,8 @@ router.put("/user/:userId/profile",authentication,updateUser)
 router.post('/products', createproduct)
 router.get('/products', getProducts)
 router.get('/products/:productId', getProductById)
-router.put("/products /:productId", updateProduct)
-router.delete('/products', deleteProduct)
+router.put("/products/:productId", updateProduct)
+router.delete('/products/:productId', deleteProduct)
 
 
 
