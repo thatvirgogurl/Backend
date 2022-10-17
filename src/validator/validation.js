@@ -28,7 +28,7 @@ const isValidpin=function (value) {
     if (/^[1-9][0-9]{5}$/.test(value)) return true;
     return false;
 };
-
+const isValidUrl=/^https?:\/\/(.+\/)+.+(\.(gif|png|jpg|jpeg|webp|svg|psd|bmp|tif|jfif))$/i
 module.exports = {
-    isValidMail, isValid, isValidName, isValidRequestBody, isValidfild, isValidMobile, isValidPassword,isValidpin
+    isValidMail, isValid, isValidName, isValidRequestBody, isValidfild, isValidMobile, isValidPassword,isValidpin,isValidUrl
 }

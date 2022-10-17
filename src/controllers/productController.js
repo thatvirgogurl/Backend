@@ -7,7 +7,7 @@ const isValidavailableSizes = function (availableSizes, inp) {
     return inp.indexOf(availableSizes) !== -1;
 };
 
-const { isValid, isValidRequestBody, isValidName, isValidfild } = require("../validator/validation")
+const { isValid, isValidRequestBody, isValidName, isValidfild ,isValidUrl} = require("../validator/validation")
 module.exports = {
     createproduct: async function (req, res) {
         try {
@@ -18,24 +18,23 @@ module.exports = {
             let { title, description, price, isFreeShipping, style, availableSizes, installments } = data
 
             if (!isValid(title)) {
-                invalidrequest.title = "Title is required"
+                invalidrequest.invalidTitle = "Please provide a Title "
             }
-            if (!(/^[a-zA-Z0-9.%$#@*& ]{3,20}$/).test(title)) {
+            if (!(/^[a-zA-Z0-9.%$#@*&' ]{3,40}$/).test(title)) {
                 invalidrequest.invalidTitle = "Title length should not be greater than 20"
-            }
-            if (!isValid(description)) {
-                invalidrequest.description = "description is required"
-            }
-            if (!(/^[a-zA-Z0-9.%$#@*& ]{10,40}$/).test(description)) {
-                invalidrequest.invalidDescription = "description length in between 10-40"
-            }
-            if (title) {
+            }else if(title) {
                 title = title.trim()
                 const unique = await productModel.findOne({ title: title })
                 if (unique) {
-                    invalidrequest.commonTitle = `${title} is  already exist`
+                    invalidrequest.invalidTitle = `[*${title}*]is  already exist`
                 }
             }
+            if (!isValid(description)) {
+                invalidrequest.description = "description is required"
+            }else if(!(/^[a-zA-Z0-9.%$#@*& ']{10,80}$/).test(description)) {
+                invalidrequest.invalidDescription = "description length in between 10-40"
+            }
+
             if (!(/^\d{0,8}[.]?\d{1,4}$/).test(price)) {
                 invalidrequest.invalidPrice = "price should be in no."
             }
@@ -70,18 +69,20 @@ module.exports = {
                 invalidrequest.invalidInstallments = "installments should be in no. And Between 1-12"
             }
 
-            if (isValidRequestBody(invalidrequest)) return res.status(400).send({ status: false, message: "invalidrequest", request: invalidrequest })
-
             const obj = { title, description, price, isFreeShipping, style, availableSizes, installments }
 
             let files = req.files
             if (files && files.length > 0) {
                 const productImage = await uploadFile(files[0])
+                if (!isValidUrl.test(productImage)) {
+                    invalidrequest.invalidProductImage ="Product image should be an Image"
+                }
                 obj.productImage = productImage
             }
             else {
-                return res.status(400).send({ status: false, msg: "No file found" })
+                invalidrequest.invalidProductImage ="Please provide Product image"
             }
+            if (isValidRequestBody(invalidrequest)) return res.status(400).send({ status: false, message: "invalidrequest", request: invalidrequest })
             obj.currencyFormat = "₹"
             obj.currencyId = "INR"
 
@@ -106,7 +107,7 @@ module.exports = {
                 condition.title = { "$options": "i", "$regex": name }
             }
             if (priceLessThan) {
-                if (priceLessThan) {
+                if (priceGreaterThan) {
                     condition.price = { $gt: priceGreaterThan, $lt: priceLessThan }
                 } else {
                     condition.price = { $lt: priceLessThan }
@@ -195,10 +196,14 @@ module.exports = {
                 if (isFreeShipping != "true" && isFreeShipping != "false") return res.status(400).send({ status: false, msg: "its must be a boolean" })
                 obj["isFreeShipping"] = isFreeShipping
             }
-            if (productImage) {
-                if (!isValidfild(productImage)) return res.status(400).send({ status: false, msg: " it's must be string" })
-                obj["productImage"] = productImage
-            }
+            let files = req.files
+        if (files && files.length > 0) {
+            const productImage = await uploadFile(files[0])
+            if (!isValidUrl.test(productImage)) return res.status(400).send({
+                status: false, message: "Product image should be an Image"
+            }) 
+            obj["productImage"] = productImage
+        }
             if (style) {
                 if (!isValidfild(style)) return res.status(400).send({ status: false, msg: " it's must be string" })
                 obj["style"] = style

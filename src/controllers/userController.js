@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt")
 const mongoose = require('mongoose')
 const { validBody, validName, validMail, validPhone, validPassword, validAddress } = require('../validator/validator')
 const userModel = require("../models/userModel")
-const { isValidMail, isValid, isValidName, isValidRequestBody, isValidMobile, isValidPassword, isValidpin } = require("../validator/validation")
+const { isValidMail, isValid, isValidName, isValidRequestBody, isValidMobile, isValidPassword, isValidpin,isValidUrl } = require("../validator/validation")
 
 const createUser = async function (req, res) {
     try {
@@ -76,6 +76,9 @@ const createUser = async function (req, res) {
         let files = req.files
         if (files && files.length > 0) {
             var profileImage = await uploadFile(files[0])
+            if (!isValidUrl.test(profileImage)) return res.status(400).send({
+                status: false, message: "Profile Image  should be an Image"
+            }) 
         }
         else {
             return res.status(400).send({ msg: "No file found" })
@@ -120,7 +123,7 @@ const loginUser = async function (req, res) {
             "#@$SamMon#TuRi14",
             { expiresIn: "24h" }
         );
-        res.status(201).send({ status: true, message: "User login successfull", data: { userId: verifyUser["_id"], token: token } })
+        res.status(200).send({ status: true, message: "User login successfull", data: { userId: verifyUser["_id"], token: token } })
     }
     catch (error) {
         return res.status(500).send({ status: false, message: error.message })
@@ -140,11 +143,8 @@ const getuserById = async function (req, res) {
                 .status(404)
                 .send({ status: "false", msg: "user not exist" });
 
-        let obj = {}
-
-        let objectOfuserDetails = userDetails.toObject();
-        obj = { ...objectOfuserDetails };
-        return res.status(200).send({ status: true, message: "User profile details", data: obj });
+        
+        return res.status(200).send({ status: true, message: "User profile details", data: userDetails });
     } catch (error) {
         return res.status(500).send({ msg: error.message });
 
@@ -170,11 +170,11 @@ const updateUser = async function (req, res) {
         let { fname, lname, email, phone, password, address } = data
         let update = {}
         if (fname) {
-            if (validName(fname)) return res.status(400).send({ status: false, message: 'Please provide valid fname' })
+            if (!validName(fname)) return res.status(400).send({ status: false, message: 'Please provide valid fname' })
             update.fname = fname
         }
         if (lname) {
-            if (validName(lname)) return res.status(400).send({ status: false, message: 'Please provide valid lname' })
+            if (!validName(lname)) return res.status(400).send({ status: false, message: 'Please provide valid lname' })
             update.lname = lname
         }
         if (email) {
@@ -185,8 +185,12 @@ const updateUser = async function (req, res) {
         }
         if (files && files.length > 0) {
             let profileImage = await uploadFile(files[0])
+            if (!isValidUrl.test(productImage)) return res.status(400).send({
+                status: false, message: "Profile Image should be an Image"
+            }) 
             update.profileImage = profileImage
         }
+
         if (phone) {
             if (!validPhone(phone)) return res.status(400).send({ status: false, message: 'Please provide valid mobile no.' })
             let phoneExist = await userModel.findOne({ phone: phone })
