@@ -3,7 +3,7 @@ const router = express.Router()
 const {authentication,authorization}=require('../middleware/auth.js')
 const {createUser,getuserById,loginUser,updateUser} = require('../controllers/userController')
 const {createproduct,getProducts,getProductById,updateProduct,deleteProduct}=require('../controllers/productController')
-const {createCart,updateCart} = require('../controllers/cartController')
+const {createCart,updateCart,getCart,deleteCart} = require('../controllers/cartController')
 
 // ---------------------------- test API ------------------------------------- //
 
@@ -30,6 +30,8 @@ router.delete('/products/:productId', deleteProduct)
 
 router.post("/users/:userId/cart",authentication,authorization,createCart)
 router.put("/users/:userId/cart",authentication,authorization,updateCart)
+router.get("/users/:userId/cart",authentication,authorization,getCart)
+router.delete("/users/:userId/cart",authentication,authorization,deleteCart)
 
 // --------------------------------------------------------------------------- //
 
