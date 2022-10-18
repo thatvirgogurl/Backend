@@ -82,7 +82,7 @@ module.exports = {
             else {
                 invalidrequest.invalidProductImage ="Please provide Product image"
             }
-            if (isValidRequestBody(invalidrequest)) return res.status(400).send({ status: false, message: "invalidrequest", request: invalidrequest })
+            if (isValidRequestBody(invalidrequest)) return res.status(400).send({ status: false, message: "invalidrequest", invalidrequest: invalidrequest })
             obj.currencyFormat = "₹"
             obj.currencyId = "INR"
 
@@ -251,3 +251,5 @@ module.exports = {
     }
 
 }
+
+

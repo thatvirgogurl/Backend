@@ -52,22 +52,22 @@ const createUser = async function (req, res) {
             address = JSON.parse(address)
             const { shipping, billing } = address
             if (!isValid(shipping.street)) {
-                return res.status(400).send({ status: false, message: "Shipping : street feild is Mandatory" })
+                return res.status(400).send({ status: false, message: "Shipping : Invalid street " })
             }
             if (!isValid(shipping.city)) {
-                return res.status(400).send({ status: false, message: "Shipping : city feild is Mandatory" })
+                return res.status(400).send({ status: false, message: "Shipping : Invalid city " })
             }
             if (!isValidpin(shipping.pincode)) {
-                return res.status(400).send({ status: false, message: "Shipping : pincode feild is Mandatory" })
+                return res.status(400).send({ status: false, message: "Shipping : Invalid pincode " })
             }
             if (!isValid(billing.street)) {
-                return res.status(400).send({ status: false, message: "Shipping : street feild is Mandatory" })
+                return res.status(400).send({ status: false, message: "Shipping :Invalid  street " })
             }
             if (!isValid(billing.city)) {
-                return res.status(400).send({ status: false, message: "Shipping : city feild is Mandatory" })
+                return res.status(400).send({ status: false, message: "Shipping : Invalid city " })
             }
             if (!isValidpin(billing.pincode)) {
-                return res.status(400).send({ status: false, message: "Shipping : pincode feild is Mandatory" })
+                return res.status(400).send({ status: false, message: "Shipping : Invalid pin code" })
             }
 
         } else {
