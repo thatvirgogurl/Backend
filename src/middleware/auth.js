@@ -25,18 +25,12 @@ let authentication = async function(req,res,next){
 let authorization = async function (req, res, next) {
     try {
         let userId = req.params.userId
-        let {productId,cartId} = req.body
-        // --------------- validations ------------------
+        // --------------- validation ------------------
         if(!mongoose.isValidObjectId(userId)) return res.status(400).send({status:false,message:"please provied a valid userId"})
         let user = await userModel.findById(userId)
         if(!user) return res.status(400).send({status:false,message:"user is not exist"})
-        if(!productId) return res.status(400).send({status:false,message:"please provide productId"})
-        if(!mongoose.isValidObjectId(productId)) return res.status(400).send({status:false,message:"please provied a valid productId"})
-        let product = await productModel.findById(productId)
-        if(!product) return res.status(400).send({status:false,message:"product is not exist"})
         // -----------------------------------------------
         if (userId != req.decodedToken) return res.status(403).send({status:false,message:'Access denied'})
-        req.price = product.price
         req.userDoc=user
         next()
     }
