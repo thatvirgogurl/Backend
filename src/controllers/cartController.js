@@ -20,14 +20,14 @@ const createCart = async function(req,res){
         let cartExist = await cartModel.findOne({userId:userId})
         if(cartExist){
             // ----------------- validate cartId -----------------
-            if(!cartId) return res.status(400).send({status:false,message:"please provide cartId"})
+            if(!cartId) return res.status(400).send({status:false,message:"cart is already created provide cartId"})
             if(!mongoose.isValidObjectId(cartId)) return res.status(400).send({status:false,message:"please provied a valid productId"})
             let cart = await cartModel.findById(cartId)
             if(!cart) return res.status(400).send({status:false,message:"cart is not exist"})
             // ----------------------------------------------------
             let productAlreadyAdded = await cartModel.findOne({"items.productId":productId})
             if(productAlreadyAdded){
-                let incProductQuantity = await cartModel.findOneAndUpdate({"items.productId":productId}
+                let incProductQuantity = await cartModel.findOneAndUpdate({_id:cart._id,"items.productId":productId}
                 ,{$inc:{totalPrice:product.price,"items.$.quantity":1}},{new:true})
                 return res.status(201).send({status:true,message:"product quantity increased",data:incProductQuantity})
             }
