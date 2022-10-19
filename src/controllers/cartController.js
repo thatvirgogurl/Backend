@@ -1,5 +1,6 @@
 const cartModel = require("../models/cartModel")
 const productModel = require("../models/productModel")
+const userModel = require("../models/userModel")
 const mongoose = require('mongoose')
 
 const createCart = async function(req,res){
@@ -50,6 +51,7 @@ const updateCart = async function(req,res){
         let userId = req.params.userId
         // --------------- validation start ------------------
         let {productId,cartId,removeProduct} = data
+        removeProduct = removeProduct.toString()
         if(!productId) return res.status(400).send({status:false,message:"please provide productId"})
         if(!mongoose.isValidObjectId(productId)) return res.status(400).send({status:false,message:"please provied a valid productId"})
         let product = await productModel.findOne({productId:productId,isDeleted:false})
@@ -84,7 +86,7 @@ const updateCart = async function(req,res){
 const getCart = async function(req,res){
     try{
         let userId = req.params.userId
-        let cart = await cartModel.findOne({userId:userId})
+        let cart = await cartModel.findOne({userId:userId}).populate('product')
         if(!cart) return res.status(400).send({status:false,message:"No cart exist"})
         res.status(200).send({status:true,message:"cart detail",data:cart})
     }

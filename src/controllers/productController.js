@@ -197,7 +197,7 @@ module.exports = {
                 obj["isFreeShipping"] = isFreeShipping
             }
             let files = req.files
-        if (files && files.length > 0) {
+            if (files && files.length > 0) {
             const productImage = await uploadFile(files[0])
             if (!isValidUrl.test(productImage)) return res.status(400).send({
                 status: false, message: "Product image should be an Image"
@@ -240,7 +240,6 @@ module.exports = {
             let productId = req.params.productId
             if (!mongoose.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Invalid product Id" })
             let condition = { isDeleted: false, _id: productId }
-
             let product = await productModel.findOneAndUpdate(condition, { $set: { isDeleted: true, deletedAt: new Date() } })
             if (!product) return res.status(400).send({ status: false, message: "product not found" })
             return res.status(200).send({ status: true, message: "Product deleted" })
@@ -249,7 +248,4 @@ module.exports = {
             return res.status(500).send({ status: false, message: err.message })
         }
     }
-
 }
-
-

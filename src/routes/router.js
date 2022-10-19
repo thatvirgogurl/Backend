@@ -4,6 +4,7 @@ const {authentication,authorization}=require('../middleware/auth.js')
 const {createUser,getuserById,loginUser,updateUser} = require('../controllers/userController')
 const {createproduct,getProducts,getProductById,updateProduct,deleteProduct}=require('../controllers/productController')
 const {createCart,updateCart,getCart,deleteCart} = require('../controllers/cartController')
+const {createOrder,updateOrder} = require('../controllers/orderController')
 
 // ---------------------------- test API ------------------------------------- //
 
@@ -32,6 +33,11 @@ router.post("/users/:userId/cart",authentication,authorization,createCart)
 router.put("/users/:userId/cart",authentication,authorization,updateCart)
 router.get("/users/:userId/cart",authentication,authorization,getCart)
 router.delete("/users/:userId/cart",authentication,authorization,deleteCart)
+
+// ---------------------------- order API ------------------------------------ //
+
+router.post("/users/:userId/orders",authentication,authorization,createOrder)
+router.put("/users/:userId/orders",authentication,authorization,updateOrder)
 
 // --------------------------------------------------------------------------- //
 
