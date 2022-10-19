@@ -35,9 +35,11 @@ const createOrder = async function(req,res){
         }
         if(status){
             if(!status.match(/pending|completed|cancelled/)) return res.status(400).send({status:false,message:"provide pending or completed or cancelled in status"})
-            orderObj.status = status
+            if(status=="cancelled")  return res.status(400).send({status:false,message:"you cant cancele a order while creating"})  
         }
         let savedOrder = await orderModel.create(orderObj)
+
+        let emptyCart = await cartModel.findOneAndUpdate({userId:userId},{$set:{totalPrice:0,totalItems:0,items:[]}},{new:true})
         res.status(201).send({status:true,message:"order executed",data:savedOrder})
     }
     catch(err){
@@ -49,17 +51,20 @@ const updateOrder = async function(req,res){
     try{
         let data = req.body
         let userId = req.params.userId
-        let {orderId} = data
+        let {orderId,status} = data
         // ----------------- validation start ----------------
         if(!orderId) return res.status(400).send({status:false,message:"please provide orderId"})
         if(!mongoose.isValidObjectId(orderId)) return res.status(400).send({status:false,message:"please provied a valid orderId"})
+        if(!status.match(/pending|completed|cancelled/)) return res.status(400).send({status:false,message:"provide pending or completed or cancelled in status"})
         let order = await orderModel.findOne({_id:orderId,userId:userId})
         if(!order) return res.status(400).send({status:false,message:"order is not exist"})
+        if(status=='cancelled'){
         if(order.cancellable == false) return res.status(400).send({status:false,message:"order is not cancellable"})
+    }
         if(order.status == 'cancelled') return res.status(400).send({status:false,message:"order is already cancelled"})
         if(order.status == 'completed') return res.status(400).send({status:false,message:"order is completed you can't cancel no"})
         // ----------------------------------------------------
-        let cancelled = await orderModel.findByIdAndUpdate(orderId,{$set:{status:'cancelled'}},{new:true})
+        let cancelled = await orderModel.findByIdAndUpdate(orderId,{$set:{status:status}},{new:true})
         res.status(201).send({status:true,message:"order cancelled",data:cancelled})
     }
     catch(err){

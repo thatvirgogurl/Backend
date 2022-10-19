@@ -10,7 +10,8 @@ const createCart = async function(req,res){
         let {productId,cartId} = data
         if(!productId) return res.status(400).send({status:false,message:"please provide productId"})
         if(!mongoose.isValidObjectId(productId)) return res.status(400).send({status:false,message:"please provied a valid productId"})
-        let product = await productModel.findOne({productId:productId,isDeleted:false})
+        let product = await productModel.findOne({_id:productId,isDeleted:false})
+        console.log(product)
         if(!product) return res.status(400).send({status:false,message:"product is not exist"})
         let cartExist = await cartModel.findOne({userId:userId})
         if(cartExist){
@@ -54,7 +55,7 @@ const updateCart = async function(req,res){
         removeProduct = removeProduct.toString()
         if(!productId) return res.status(400).send({status:false,message:"please provide productId"})
         if(!mongoose.isValidObjectId(productId)) return res.status(400).send({status:false,message:"please provied a valid productId"})
-        let product = await productModel.findOne({productId:productId,isDeleted:false})
+        let product = await productModel.findOne({_id:productId,isDeleted:false})
         if(!product) return res.status(400).send({status:false,message:"product is not exist"})
         if(!cartId) return res.status(400).send({status:false,message:"please provide cartId"})
         if(!mongoose.isValidObjectId(cartId)) return res.status(400).send({status:false,message:"please provied a valid productId"})
