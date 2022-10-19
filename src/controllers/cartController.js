@@ -59,12 +59,14 @@ const updateCart = async function(req,res){
         let cart = await cartModel.findOne({_id:cartId,userId:userId})
         if(!cart) return res.status(400).send({status:false,message:"cart is not exist"})
         if(!removeProduct) return res.status(400).send({status:false,message:"Please provide removeProduct key"})
-        let productInCart = await cartModel.findOne({_id:cartId,"items.productId":productId})
+        let productInCart = await cartModel.findOne({_id:cartId,"items.productId":productId}).select({_id:0,"items":{"$elemMatch":{"productId":productId}}})
         if(!productInCart) return res.status(400).send({status:false,message:"Product not in the cart"})
         // ----------------------------------------------------
-        if(removeProduct == 0){
+        let quantity = productInCart.items[0].quantity
+        if(removeProduct == 0 || quantity == 1){
+            let price = quantity * product.price
             let productRemoved = await cartModel.findByIdAndUpdate(cartId,
-                {$inc:{totalPrice:-product.price,totalItems:-1},$pull:{items:{productId:productId}}},{new:true})
+                {$inc:{totalPrice:-price,totalItems:-1},$pull:{items:{productId:productId}}},{new:true})
             return res.status(201).send({status:true,message:"product removed from cart",data:productRemoved})
         }
         if(removeProduct == 1){
