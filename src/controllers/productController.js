@@ -1,7 +1,7 @@
 const productModel = require("../models/productModel")
 const { uploadFile } = require("./aws3")
 const mongoose = require('mongoose')
-const { isValid, isValidRequestBody, isValidName, isValidfild ,validImage} = require("../validator/validation")
+const { isValid, isValidRequestBody, isValidName, isValidfild, validImage } = require("../validator/validation")
 
 
 module.exports = {
@@ -9,30 +9,32 @@ module.exports = {
         try {
             const data = req.body
             const invalidrequest = {}
+            
             // ------------------------- validations start -----------------------------------
-            if(!isValidRequestBody(data)) invalidrequest.invalidBody = { status: false, message: " body cant't be empty Please enter some data." }
-            let { title, description, price, isFreeShipping, style, availableSizes, installments,currencyId} = data
-            if(!isValid(title)) {invalidrequest.invalidTitle = "Please provide a Title"}
-            if(!(/^[a-zA-Z0-9.%$#@*&' ]{3,40}$/).test(title)) {invalidrequest.invalidTitle = "Title length should not be greater than 20"}
-            else if(title){
+            if (!isValidRequestBody(data)){
+                invalidrequest.invalidBody = { status: false, message: " body cant't be empty Please enter some data." } }
+            let { title, description, price, isFreeShipping, style, availableSizes, installments, currencyId } = data
+            if (!isValid(title)) { invalidrequest.invalidTitle = "Please provide a Title" }
+            if (!(/^[a-zA-Z0-9.%$#@*&' ]{3,40}$/).test(title)) { invalidrequest.invalidTitle = "Title length should not be greater than 20" }
+            else if (title) {
                 title = title.trim()
                 const unique = await productModel.findOne({ title: title })
-                if(unique) {invalidrequest.invalidTitle = `[*${title}*]is  already exist`}
+                if (unique) { invalidrequest.invalidTitle = `[*${title}*]is  already exist` }
             }
-            if(!isValid(description)) {
+            if (!isValid(description)) {
                 invalidrequest.description = "description is required"
-            }else if(!(/^[a-zA-Z0-9.%$#@*& ']{10,80}$/).test(description)) {
-                invalidrequest.invalidDescription = "description length in between 10-40"
+            } else if (!(/^[a-zA-Z0-9.%$#@*&, ']{10,80}$/).test(description)) {
+                invalidrequest.invalidDescription = "description length in between 10-80"
             }
             if (!(/^\d{0,8}[.]?\d{1,4}$/).test(price)) {
                 invalidrequest.invalidPrice = "price should be in no."
             }
-            if(isFreeShipping){
+            if (isFreeShipping) {
                 if (isFreeShipping != "true" && isFreeShipping != "false") {
                     invalidrequest.invalidIsFreeShipping = "isFreeShipping should be a boolean value"
                 }
             }
-            
+
             if (!isValidName.test(style)) {
                 invalidrequest.invalidStyle = {
                     status: false, msg: "Enter a valid style",
@@ -54,37 +56,37 @@ module.exports = {
             } else {
                 invalidrequest.invalidAvailableSizes = "availableSizes is required"
             }
-            if(installments){
+            if (installments) {
                 if (!(/^([0]?[1-9]|1[0-2])$/).test(installments)) {
                     invalidrequest.invalidInstallments = "installments should be in no. And Between 1-12"
                 }
             }
-            if(!currencyId){
+            if (!currencyId) {
                 invalidrequest.invalidcurrencyId = "Please provide a currencyId"
-            }else if(!currencyId.match(/INR|USD/)){ 
+            } else if (!currencyId.match(/INR|USD/)) {
                 invalidrequest.invalidcurrencyId = "currencyId support only INR or USD"
-            }                   
-            const obj = { title, description, price, isFreeShipping, style, availableSizes, installments,currencyId}
+            }
+            const obj = { title, description, price, isFreeShipping, style, availableSizes, installments, currencyId }
 
             obj.currencyFormat = currencyId == 'INR' ? "₹" : "$"
-            let files = req.files[0]
-            if (files) {
-                if (!validImage(files)) return res.status(400).send({status: false, message: "Product Image should be an Image"})
+            let files1 = req.files
+            if (files1 && files1.length > 0) {
+                let files = req.files[0]
+                if (!validImage(files)) return res.status(400).send({ status: false, message: "Product Image should be an Image" })
                 const productImage = await uploadFile(files)
                 obj.productImage = productImage
-            }
-            else {
-                invalidrequest.invalidProductImage ="Please provide Product image"
+            }else {
+                invalidrequest.invalidProductImage = "Please provide Product image"
             }
             if (isValidRequestBody(invalidrequest)) return res.status(400).send({ status: false, message: "invalidrequest", invalidrequest: invalidrequest })
             // ------------------------- validations end -----------------------------------            
-            const book = await productModel.create(obj)
-            res.status(201).send({ status: true, message: "product successfully created", data: book })
+            const product = await productModel.create(obj)
+            res.status(201).send({ status: true, message: "Success", data: product })
         } catch (err) {
             res.status(500).send({ status: false, message: err.message })
         }
     },
-    
+
     getProducts: async function (req, res) {
         try {
             let data = req.query
@@ -138,7 +140,7 @@ module.exports = {
                     })
                 }
             }
-            return res.status(200).send({ status: true, message: "Products details", data: products })
+            return res.status(200).send({ status: true, message: "Success", data: products })
         }
 
         catch (err) {
@@ -150,12 +152,16 @@ module.exports = {
         try {
             let productId = req.params.productId
             // ------------------------- validations start -----------------------------------
-            if (!mongoose.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Invalid product Id" })
+            if (!mongoose.isValidObjectId(productId)) {
+                return res.status(400).send({ status: false, message: "Invalid product Id" })
+            }
             let condition = { isDeleted: false, _id: productId }
             let product = await productModel.findOne(condition)
-            if (!product) return res.status(400).send({ status: false, message: "product not found" })
+            if (!product) {
+                return res.status(400).send({ status: false, message: "product not found" })
+            }
             // ------------------------- validations end -----------------------------------
-            return res.status(200).send({ status: true, message: "Product details", data: product })
+            return res.status(200).send({ status: true, message: "Success", data: product })
         }
         catch (err) {
             return res.status(500).send({ status: false, message: err.message })
@@ -200,9 +206,10 @@ module.exports = {
                 if (isFreeShipping != "true" && isFreeShipping != "false") return res.status(400).send({ status: false, msg: "its must be a boolean" })
                 obj["isFreeShipping"] = isFreeShipping
             }
-            if (req.files) {
+            const files1 = req.files
+            if (files1.length >= 1) {
                 let files = req.files[0]
-                if (!validImage(files)) return res.status(400).send({status: false, message: "Please provide a valid product Image"})
+                if (!validImage(files)) return res.status(400).send({ status: false, message: "Please provide a valid product Image" })
                 const productImage = await uploadFile(files)
                 obj["productImage"] = productImage
             }
@@ -227,7 +234,7 @@ module.exports = {
 
             }
             // ------------------------- validations end ------------------------------------
-            let updatebook = await productModel.findOneAndUpdate({ _id: productId,isDeleted:false}, { $set: obj }, { new: true })
+            let updatebook = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false }, { $set: obj }, { new: true })
             res.status(200).send({ status: true, message: 'Successfully Document Update', data: updatebook });
 
         } catch (err) {
@@ -238,7 +245,9 @@ module.exports = {
         try {
             let productId = req.params.productId
             // ------------------------- validations start -----------------------------------
-            if (!mongoose.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Invalid product Id" })
+            if (!mongoose.isValidObjectId(productId)) {
+                return res.status(400).send({ status: false, message: "Invalid product Id" })
+            }
             let condition = { isDeleted: false, _id: productId }
             let product = await productModel.findOneAndUpdate(condition, { $set: { isDeleted: true, deletedAt: new Date() } })
             if (!product) return res.status(400).send({ status: false, message: "product not found" })

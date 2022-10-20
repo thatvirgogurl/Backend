@@ -34,7 +34,7 @@ function validAddress(address){
     if(!address.street) return false
     if(!address.city) return false
     if(!address.pincode) return false
-    return /^[a-zA-Z0-9\s\,\''\-]*$/.test(address.street.trim()) && /^[A-Za-z ]{1,20}$/.test(address.city.trim()) && 
+    return /^[a-zA-Z0-9 .\s\,\''\-]*$/.test(address.street.trim()) && /^[A-Za-z ]{1,20}$/.test(address.city.trim()) && 
     /^[1-9][0-9]{5}$/.test(address.pincode.trim())
 }
 

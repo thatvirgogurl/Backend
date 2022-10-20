@@ -3,19 +3,31 @@ const { uploadFile } = require("./aws3")
 const bcrypt = require("bcrypt")
 const mongoose = require('mongoose')
 const userModel = require("../models/userModel")
-const { isValidMail, isValid, isValidName, isValidRequestBody, isValidMobile, isValidPassword,validAddress,validImage } = require("../validator/validation")
+const { isValidMail, isValid, isValidName, isValidRequestBody, isValidMobile, isValidPassword, validAddress, validImage } = require("../validator/validation")
 
 const createUser = async function (req, res) {
     try {
         let data = req.body
         // ------------------ valiadtions start ---------------------------------
-        if (!isValidRequestBody(data)) return res.status(400).send({ status: false, msg: " body cant't be empty Please enter some data."})
+        if (!isValidRequestBody(data)) return res.status(400).send({ status: false, msg: " body cant't be empty Please enter some data." })
         let { fname, lname, phone, email, password, address } = data
-        if (!isValid(fname)) return res.status(400).send({ status: false, message: "first name is  required"})
-        if (!isValid(lname)) return res.status(400).send({ status: false, message: "last name is  required"})
-        if (!isValid(email)) return res.status(400).send({ status: false, message: "mail id is required" })
-        if (!isValid(phone)) return res.status(400).send({ status: false, message: "phone no. is required" })
-        if (!isValid(password)) return res.status(400).send({ status: false, message: "password is required"})
+
+        if (!isValid(fname)) {
+            return res.status(400).send({ status: false, message: "first name is  required" })
+        }
+        if (!isValid(lname)) {
+            return res.status(400).send({ status: false, message: "last name is  required" })
+        }
+        if (!isValid(email)) {
+            return res.status(400).send({ status: false, message: "mail id is required" })
+        }
+        if (!isValid(phone)) {
+            return res.status(400).send({ status: false, message: "phone no. is required" })
+        }
+        if (!isValid(password)) {
+            return res.status(400).send({ status: false, message: "password is required" })
+        }
+
         if (!isValidName.test(fname)) return res.status(400).send({
             status: false, msg: "Enter a valid fname",
             validname: "length of fname has to be in between (3-20)  , use only String "
@@ -42,31 +54,64 @@ const createUser = async function (req, res) {
             status: false, message: "enter valid password  ",
             ValidPassWord: "passWord in between(8-15)& must be contain ==> upperCase,lowerCase,specialCharecter & Number"
         })
-        const hash = await bcrypt.hash(password, 10);
+        const salt = await bcrypt.genSalt(10)
+        const hash = await bcrypt.hash(password, salt);
         let files = req.files[0]
-        if (!validImage(files)) return res.status(400).send({status: false, message: "provide a valid image in profileImage"})
+        if (!validImage(files)) {
+            return res.status(400).send({ status: false, message: "provide a valid image in profileImage" })
+        }
         const profileImage = await uploadFile(files)
         // ------------------- address validations -------------------------------
-        if(!address) return res.status(400).send({ status: false, message: "Please provide shipping and billing address"})
+        if (!address) return res.status(400).send({ status: false, message: "Please provide shipping and billing address" })
         address = JSON.parse(address)
-        if(typeof address !== "object") return res.status(400).send({ status: false, message: "Please provide address in object form"})
-        let{shipping,billing} = address
-        if(!shipping) return res.status(400).send({ status: false, message: "Please provide shipping address"})
-        if(typeof shipping !== "object") return res.status(400).send({ status: false, message: "Please provide shipping address in object form"})
-        if(!shipping.street) return res.status(400).send({ status: false, message: "Please provide street in shipping address"})
-        if(!shipping.city) return res.status(400).send({ status: false, message: "Please provide city in shipping address"})
-        if(!shipping.pincode) return res.status(400).send({ status: false, message: "Please provide pincode in shipping address"})
-        if(!validAddress(shipping)) return res.status(400).send({status:false,message:'Please provide all valid field in shipping address',
-        validAddress:'street : string format,city : alphabets only,Pincode : indian 6 digit pincode'})
-        if(!billing) return res.status(400).send({ status: false, message: "Please provide billing address"})
-        if(typeof billing !== "object") return res.status(400).send({ status: false, message: "Please provide billing address in object form"})
-        if(!billing.street) return res.status(400).send({ status: false, message: "Please provide street in billing address"})
-        if(!billing.city) return res.status(400).send({ status: false, message: "Please provide city in billing address"})
-        if(!billing.pincode) return res.status(400).send({ status: false, message: "Please provide pincode in billing address"})
-        if(!validAddress(billing)) return res.status(400).send({status:false,message:'Please provide all valid field in billing address',
-        validAddress:'street : string format,city : alphabets only,Pincode : indian 6 digit pincode'})
+        if (typeof address !== "object") {
+            return res.status(400).send({ status: false, message: "Please provide address in object form" })
+        }
+        let { shipping, billing } = address
+        if (!shipping) {
+            return res.status(400).send({ status: false, message: "Please provide shipping address" })
+        }
+        if (typeof shipping !== "object") {
+            return res.status(400).send({ status: false, message: "Please provide shipping address in object form" })
+        }
+        if (!shipping.street) {
+            return res.status(400).send({ status: false, message: "Please provide street in shipping address" })
+        }
+        if (!shipping.city) {
+            return res.status(400).send({ status: false, message: "Please provide city in shipping address" })
+        }
+        if (!shipping.pincode) {
+            return res.status(400).send({ status: false, message: "Please provide pincode in shipping address" })
+        }
+        if (!validAddress(shipping)) {
+            return res.status(400).send({
+                status: false, message: 'Please provide all valid field in shipping address',
+                validAddress: 'street : string format,city : alphabets only,Pincode : indian 6 digit pincode'
+            })
+        }
+        if (!billing) {
+            return res.status(400).send({ status: false, message: "Please provide billing address" })
+        }
+        if (typeof billing !== "object") {
+            return res.status(400).send({ status: false, message: "Please provide billing address in object form" })
+        }
+        if (!billing.street) {
+            return res.status(400).send({ status: false, message: "Please provide street in billing address" })
+        }
+        if (!billing.city) {
+            return res.status(400).send({ status: false, message: "Please provide city in billing address" })
+        }
+        if (!billing.pincode) {
+            return res.status(400).send({ status: false, message: "Please provide pincode in billing address" })
+        }
+        if (!validAddress(billing)) {
+            return res.status(400).send({
+                status: false, message: 'Please provide all valid field in billing address',
+                validAddress: 'street : string format,city : alphabets only,Pincode : indian 6 digit pincode'
+            })
+        }
         // ------------------------- validations end -----------------------------------
-        
+
         const userData = {
             fname, lname, email, phone, password: hash, address, profileImage
         }
@@ -164,9 +209,9 @@ const updateUser = async function (req, res) {
             update.email = email
         }
         let files = req.files[0]
-        if(files){
-            if (!validImage(files)) return res.status(400).send({status: false, message: "Profile Image  should be an Image"})
-            let profileImage = await uploadFile(files) 
+        if (files) {
+            if (!validImage(files)) return res.status(400).send({ status: false, message: "Profile Image  should be an Image" })
+            let profileImage = await uploadFile(files)
             update.profileImage = profileImage
         }
         if (phone) {
@@ -182,25 +227,29 @@ const updateUser = async function (req, res) {
         }
         if (address) {
             address = JSON.parse(address)
-            if(typeof address !== "object") return res.status(400).send({ status: false, message: "Please provide address in object form"})
-            let{shipping,billing} = address
-            if(!shipping) return res.status(400).send({ status: false, message: "Please provide shipping address"})
-            if(typeof shipping !== "object") return res.status(400).send({ status: false, message: "Please provide shipping address in object form"})
-            if(!shipping.street) return res.status(400).send({ status: false, message: "Please provide street in shipping address"})
-            if(!shipping.city) return res.status(400).send({ status: false, message: "Please provide city in shipping address"})
-            if(!shipping.pincode) return res.status(400).send({ status: false, message: "Please provide pincode in shipping address"})
-            if(!validAddress(shipping)) return res.status(400).send({status:false,message:'Please provide all valid field in shipping address',
-            validAddress:'street : string format,city : alphabets only,Pincode : indian 6 digit pincode'})
-            if(!billing) return res.status(400).send({ status: false, message: "Please provide billing address"})
-            if(typeof billing !== "object") return res.status(400).send({ status: false, message: "Please provide billing address in object form"})
-            if(!billing.street) return res.status(400).send({ status: false, message: "Please provide street in billing address"})
-            if(!billing.city) return res.status(400).send({ status: false, message: "Please provide city in billing address"})
-            if(!billing.pincode) return res.status(400).send({ status: false, message: "Please provide pincode in billing address"})
-            if(!validAddress(billing)) return res.status(400).send({status:false,message:'Please provide all valid field in billing address',
-            validAddress:'street : string format,city : alphabets only,Pincode : indian 6 digit pincode'})            
+            if (typeof address !== "object") return res.status(400).send({ status: false, message: "Please provide address in object form" })
+            let { shipping, billing } = address
+            if (!shipping) return res.status(400).send({ status: false, message: "Please provide shipping address" })
+            if (typeof shipping !== "object") return res.status(400).send({ status: false, message: "Please provide shipping address in object form" })
+            if (!shipping.street) return res.status(400).send({ status: false, message: "Please provide street in shipping address" })
+            if (!shipping.city) return res.status(400).send({ status: false, message: "Please provide city in shipping address" })
+            if (!shipping.pincode) return res.status(400).send({ status: false, message: "Please provide pincode in shipping address" })
+            if (!validAddress(shipping)) return res.status(400).send({
+                status: false, message: 'Please provide all valid field in shipping address',
+                validAddress: 'street : string format,city : alphabets only,Pincode : indian 6 digit pincode'
+            })
+            if (!billing) return res.status(400).send({ status: false, message: "Please provide billing address" })
+            if (typeof billing !== "object") return res.status(400).send({ status: false, message: "Please provide billing address in object form" })
+            if (!billing.street) return res.status(400).send({ status: false, message: "Please provide street in billing address" })
+            if (!billing.city) return res.status(400).send({ status: false, message: "Please provide city in billing address" })
+            if (!billing.pincode) return res.status(400).send({ status: false, message: "Please provide pincode in billing address" })
+            if (!validAddress(billing)) return res.status(400).send({
+                status: false, message: 'Please provide all valid field in billing address',
+                validAddress: 'street : string format,city : alphabets only,Pincode : indian 6 digit pincode'
+            })
             update.address = address
         }
-        if(Object.keys(update).length == 0) return res.status(400).send({ status: false, message: 'Please provide something to update'})
+        if (Object.keys(update).length == 0) return res.status(400).send({ status: false, message: 'Please provide something to update' })
         // ------------------------- validations end -----------------------------------
         let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, { $set: update }, { new: true })
         return res.status(200).send({ status: true, message: 'User profile updated', data: updatedUser })

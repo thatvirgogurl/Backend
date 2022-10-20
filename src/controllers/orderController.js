@@ -8,14 +8,16 @@ const createOrder = async function(req,res){
         let userId = req.params.userId
         let {cartId,cancellable,status} = data
         // ----------------- validations start ----------------
-        if(!cartId) return res.status(400).send({status:false,message:"please provide cartId"})
-        if(!mongoose.isValidObjectId(cartId)) return res.status(400).send({status:false,message:"please provied a valid productId"})
+        if(!cartId) {
+            return res.status(400).send({status:false,message:"please provide cartId"})}
+        if(!mongoose.isValidObjectId(cartId)) {
+            return res.status(400).send({status:false,message:"please provied a valid productId"})}
         let cart = await cartModel.findOne({_id:cartId,userId:userId})
-        if(!cart) return res.status(400).send({status:false,message:"cart is not exist"})
-        if(cart.totalItems == 0) return res.status(400).send({status:false,message:"Cart is empty nothing to order"})
-        //let order = await orderModel.findOne({userId:userId})
-        //if(order) return res.status(400).send({status:false,message:"order is already executed"})
-        // ----------------------------------------------------
+        if(!cart) {
+            return res.status(400).send({status:false,message:"cart is not exist"})}
+        if(cart.totalItems == 0) {
+            return res.status(400).send({status:false,message:"Cart is empty nothing to order"})}
+        
         let totalQuantity = 0
         for(let i=0;i<cart.items.length;i++){
             totalQuantity = totalQuantity+cart.items[i].quantity
@@ -39,7 +41,7 @@ const createOrder = async function(req,res){
         }
         let savedOrder = await orderModel.create(orderObj)
         let emptyCart = await cartModel.findOneAndUpdate({userId:userId},{$set:{totalPrice:0,totalItems:0,items:[]}},{new:true})
-        res.status(201).send({status:true,message:"order executed",data:savedOrder})
+        res.status(201).send({status:true,message:"Success",data:savedOrder})
     }
     catch(err){
 	    res.status(500).send({status:false,message: err.message})
@@ -52,29 +54,41 @@ const updateOrder = async function(req,res){
         let userId = req.params.userId
         let {orderId,status} = data
         // ----------------- validation start ----------------
-        if(!orderId) return res.status(400).send({status:false,message:"please provide orderId"})
-        if(!mongoose.isValidObjectId(orderId)) return res.status(400).send({status:false,message:"please provied a valid orderId"})        
-        if(!status.match(/pending|completed|cancelled/)) return res.status(400).send({status:false,message:"provide pending or completed or cancelled in status"})
+        if(!orderId) {
+            return res.status(400).send({status:false,message:"please provide orderId"})}
+        if(!mongoose.isValidObjectId(orderId)) {
+            return res.status(400).send({status:false,message:"please provied a valid orderId"})}        
+        if(!status.match(/pending|completed|cancelled/)) {
+            return res.status(400).send({status:false,message:"provide pending or completed or cancelled in status"})}
         let order = await orderModel.findOne({_id:orderId,userId:userId})
-        if(!order) return res.status(400).send({status:false,message:"order is not exist"})
+        if(!order) {
+            return res.status(400).send({status:false,message:"order is not exist"})}
         
         if(status == 'cancelled'){
-            if(order.cancellable == false) return res.status(400).send({status:false,message:"order is not cancellable"})
-            if(order.status == 'cancelled') return res.status(400).send({status:false,message:"order is already cancelled"})
-            if(order.status == 'completed') return res.status(400).send({status:false,message:"order is completed you can't cancel now"})
+            if(order.cancellable == false) {
+                return res.status(400).send({status:false,message:"order is not cancellable"})}
+            if(order.status == 'cancelled') {
+                return res.status(400).send({status:false,message:"order is already cancelled"})}
+            if(order.status == 'completed') {
+                return res.status(400).send({status:false,message:"order is completed you can't cancel now"})}
         }
         if(status == 'pending'){
-            if(order.status == 'pending') return res.status(400).send({status:false,message:"order process is already pending"})
-            if(order.status == 'completed') return res.status(400).send({status:false,message:"order is completed you can't give status pending"})
-            if(order.status == 'cancelled') return res.status(400).send({status:false,message:"order is already cancelled"})
+            if(order.status == 'pending') {
+                return res.status(400).send({status:false,message:"order process is already pending"})}
+            if(order.status == 'completed') {
+                return res.status(400).send({status:false,message:"order is completed you can't give status pending"})}
+            if(order.status == 'cancelled') {
+                return res.status(400).send({status:false,message:"order is already cancelled"})}
         }
         if(status == 'completed'){
-            if(order.status == 'cancelled') return res.status(400).send({status:false,message:"order is cancelled you can't give status completed"})
-            if(order.status == 'completed') return res.status(400).send({status:false,message:"order is already completed"})
+            if(order.status == 'cancelled') {
+                return res.status(400).send({status:false,message:"order is cancelled you can't give status completed"})}
+            if(order.status == 'completed') {
+                return res.status(400).send({status:false,message:"order is already completed"})}
         }
         // ----------------------------------------------------
         let cancelled = await orderModel.findByIdAndUpdate(orderId,{$set:{status:status}},{new:true})
-        res.status(201).send({status:true,message:"order cancelled",data:cancelled})
+        res.status(200).send({status:true,message:"Success",data:cancelled})
     }
     catch(err){
 	    res.status(500).send({status:false,message: err.message})
