@@ -3,10 +3,6 @@ const { uploadFile } = require("./aws3")
 const mongoose = require('mongoose')
 
 
-const isValidavailableSizes = function (availableSizes, inp) {
-    return inp.indexOf(availableSizes) !== -1;
-};
-
 const { isValid, isValidRequestBody, isValidName, isValidfild ,isValidUrl} = require("../validator/validation")
 module.exports = {
     createproduct: async function (req, res) {
