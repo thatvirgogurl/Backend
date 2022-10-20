@@ -28,7 +28,25 @@ const isValidpin=function (value) {
     if (/^[1-9][0-9]{5}$/.test(value)) return true;
     return false;
 };
-const isValidUrl=/^https?:\/\/(.+\/)+.+(\.(gif|png|jpg|jpeg|webp|svg|psd|bmp|tif|jfif))$/i
+//const isValidUrl=/^https?:\/\/(.+\/)+.+(\.(gif|png|jpg|jpeg|webp|svg|psd|bmp|tif|jfif))$/i
+
+function validAddress(address){
+    if(!address.street) return false
+    if(!address.city) return false
+    if(!address.pincode) return false
+    return /^[a-zA-Z0-9\s\,\''\-]*$/.test(address.street.trim()) && /^[A-Za-z ]{1,20}$/.test(address.city.trim()) && 
+    /^[1-9][0-9]{5}$/.test(address.pincode.trim())
+}
+
+function validImage(files){
+    if(!files) return false
+    let type = files.mimetype
+    type = type.substr(0,type.indexOf('/'))
+    if(type == 'image') return true
+    return false
+}
+
 module.exports = {
-    isValidMail, isValid, isValidName, isValidRequestBody, isValidfild, isValidMobile, isValidPassword,isValidpin,isValidUrl
+    isValidMail, isValid, isValidName, isValidRequestBody, isValidfild, isValidMobile, isValidPassword,isValidpin,
+    validImage,validAddress
 }
