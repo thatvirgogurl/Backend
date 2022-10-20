@@ -11,7 +11,6 @@ const createCart = async function(req,res){
         if(!productId) return res.status(400).send({status:false,message:"please provide productId"})
         if(!mongoose.isValidObjectId(productId)) return res.status(400).send({status:false,message:"please provied a valid productId"})
         let product = await productModel.findOne({_id:productId,isDeleted:false})
-        console.log(product)
         if(!product) return res.status(400).send({status:false,message:"product is not exist"})
         let cartExist = await cartModel.findOne({userId:userId})
         if(cartExist){
@@ -40,7 +39,7 @@ const createCart = async function(req,res){
             totalPrice:product.price,
             totalItems:1
         }
-        let savedCart = await cartModel.create(cartObj).populate("items.productId", ["title", "price", "productImage"])
+        let savedCart = await cartModel.create(cartObj)
         res.status(201).send({status:true,message:"Cart created",data:savedCart})
     }
     catch(err){

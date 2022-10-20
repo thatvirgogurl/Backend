@@ -30,7 +30,7 @@ let authorization = async function (req, res, next) {
         let user = await userModel.findById(userId)
         if(!user) return res.status(400).send({status:false,message:"user is not exist"})
         // -----------------------------------------------
-        if (userId != req.decodedToken) return res.status(403).send({status:false,message:'Access denied'})
+        if (userId != req.decodedToken) return res.status(403).send({status:false,message:'Access denied Unauthorized User'})
         req.userDoc=user
         next()
     }

@@ -59,8 +59,9 @@ module.exports = {
                     invalidrequest.invalidInstallments = "installments should be in no. And Between 1-12"
                 }
             }
-            
-            if(!currencyId.match(/INR|USD/)){ 
+            if(!currencyId){
+                invalidrequest.invalidcurrencyId = "Please provide a currencyId"
+            }else if(!currencyId.match(/INR|USD/)){ 
                 invalidrequest.invalidcurrencyId = "currencyId support only INR or USD"
             }                   
             const obj = { title, description, price, isFreeShipping, style, availableSizes, installments,currencyId}

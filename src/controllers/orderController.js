@@ -26,7 +26,7 @@ const createOrder = async function(req,res){
             totalPrice : cart.totalPrice,
             totalItems : cart.totalItems,
             totalQuantity : totalQuantity,
-            cancellable : true,
+            cancellable:cancellable,
             status : 'pending'
         }
         if(cancellable){
@@ -57,6 +57,7 @@ const updateOrder = async function(req,res){
         if(!status.match(/pending|completed|cancelled/)) return res.status(400).send({status:false,message:"provide pending or completed or cancelled in status"})
         let order = await orderModel.findOne({_id:orderId,userId:userId})
         if(!order) return res.status(400).send({status:false,message:"order is not exist"})
+        
         if(status == 'cancelled'){
             if(order.cancellable == false) return res.status(400).send({status:false,message:"order is not cancellable"})
             if(order.status == 'cancelled') return res.status(400).send({status:false,message:"order is already cancelled"})
@@ -65,6 +66,7 @@ const updateOrder = async function(req,res){
         if(status == 'pending'){
             if(order.status == 'pending') return res.status(400).send({status:false,message:"order process is already pending"})
             if(order.status == 'completed') return res.status(400).send({status:false,message:"order is completed you can't give status pending"})
+            if(order.status == 'cancelled') return res.status(400).send({status:false,message:"order is already cancelled"})
         }
         if(status == 'completed'){
             if(order.status == 'cancelled') return res.status(400).send({status:false,message:"order is cancelled you can't give status completed"})
