@@ -8,6 +8,7 @@ const { isValidMail, isValid, isValidName, isValidRequestBody, isValidMobile, is
 const createUser = async function (req, res) {
     try {
         let data = req.body
+        // ------------------ valiadtions start ---------------------------------
         if (!isValidRequestBody(data)) return res.status(400).send({ status: false, msg: " body cant't be empty Please enter some data."})
         let { fname, lname, phone, email, password, address } = data
         if (!isValid(fname)) return res.status(400).send({ status: false, message: "first name is  required"})
@@ -42,6 +43,9 @@ const createUser = async function (req, res) {
             ValidPassWord: "passWord in between(8-15)& must be contain ==> upperCase,lowerCase,specialCharecter & Number"
         })
         const hash = await bcrypt.hash(password, 10);
+        let files = req.files[0]
+        if (!validImage(files)) return res.status(400).send({status: false, message: "provide a valid image in profileImage"})
+        const profileImage = await uploadFile(files)
         // ------------------- address validations -------------------------------
         if(!address) return res.status(400).send({ status: false, message: "Please provide shipping and billing address"})
         address = JSON.parse(address)
@@ -62,11 +66,7 @@ const createUser = async function (req, res) {
         if(!validAddress(billing)) return res.status(400).send({status:false,message:'Please provide all valid field in billing address',
         validAddress:'street : string format,city : alphabets only,Pincode : indian 6 digit pincode'})
         // ------------------------- validations end -----------------------------------
-        let files = req.files[0]
-        if (!validImage(files)) return res.status(400).send({status: false, message: "Profile Image  should be an Image"})
-        const profileImage = await uploadFile(files)
         
-
         const userData = {
             fname, lname, email, phone, password: hash, address, profileImage
         }
@@ -84,23 +84,22 @@ const createUser = async function (req, res) {
 const loginUser = async function (req, res) {
 
     try {
+        // ------------------ valiadtions start ---------------------------------
+
         if (!isValidRequestBody(req.body)) return res.status(400).send({ status: false, message: "request body can't be empty enter some data." })
         let email = req.body.email
         if (!isValid(email)) return res.status(400).send({ status: false, message: "email required" })
         if (!isValidMail.test(email)) return res.status(400).send({ status: false, message: "enter a valid email" })
-
         let password = req.body.password
         if (!isValid(password)) return res.status(400).send({ status: false, message: "password is required" })
-
         let verifyUser = await userModel.findOne({ email: email })
-
         if (verifyUser) {
             const result = await bcrypt.compare(password, verifyUser.password);
             if (!result) return res.status(400).send({ status: false, message: "password  is incorrect" })
         } else {
             return res.status(400).send({ status: false, message: "email  is incorrect" })
         }
-
+        // ------------------------- validations end -----------------------------------
         let token = jwt.sign(
             { userId: verifyUser._id.toString() },
             "#@$SamMon#TuRi14",
@@ -117,7 +116,6 @@ const loginUser = async function (req, res) {
 const getuserById = async function (req, res) {
     try {
         const userId = req.params.userId;
-
         if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "please provide a valid userId" })
         //-------------------------------Authorizition-----------------------------//
 
@@ -147,7 +145,7 @@ const updateUser = async function (req, res) {
 
         //-------------------------------Authorizition-----------------------------//
 
-        
+        // ------------------------- validations start -----------------------------------
         if (!isValidRequestBody(data) && !req.files) return res.status(400).send({ status: false, message: 'Please provide something to update' })
         let { fname, lname, email, phone, password, address } = data
         let update = {}
@@ -203,6 +201,7 @@ const updateUser = async function (req, res) {
             update.address = address
         }
         if(Object.keys(update).length == 0) return res.status(400).send({ status: false, message: 'Please provide something to update'})
+        // ------------------------- validations end -----------------------------------
         let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, { $set: update }, { new: true })
         return res.status(200).send({ status: true, message: 'User profile updated', data: updatedUser })
     }

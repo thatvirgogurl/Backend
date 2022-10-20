@@ -8,8 +8,8 @@ module.exports = {
         try {
             const data = req.body
             const invalidrequest = {}
+            // ------------------------- validations start -----------------------------------
             if(!isValidRequestBody(data)) invalidrequest.invalidBody = { status: false, message: " body cant't be empty Please enter some data." }
-
             let { title, description, price, isFreeShipping, style, availableSizes, installments,currencyId} = data
             if(!isValid(title)) {invalidrequest.invalidTitle = "Please provide a Title"}
             if(!(/^[a-zA-Z0-9.%$#@*&' ]{3,40}$/).test(title)) {invalidrequest.invalidTitle = "Title length should not be greater than 20"}
@@ -74,8 +74,7 @@ module.exports = {
                 invalidrequest.invalidProductImage ="Please provide Product image"
             }
             if (isValidRequestBody(invalidrequest)) return res.status(400).send({ status: false, message: "invalidrequest", invalidrequest: invalidrequest })
-
-
+            // ------------------------- validations end -----------------------------------            
             const book = await productModel.create(obj)
             res.status(201).send({ status: true, message: "product successfully created", data: book })
         } catch (err) {
@@ -147,10 +146,12 @@ module.exports = {
     getProductById: async function (req, res) {
         try {
             let productId = req.params.productId
+            // ------------------------- validations start -----------------------------------
             if (!mongoose.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Invalid product Id" })
             let condition = { isDeleted: false, _id: productId }
             let product = await productModel.findOne(condition)
             if (!product) return res.status(400).send({ status: false, message: "product not found" })
+            // ------------------------- validations end -----------------------------------
             return res.status(200).send({ status: true, message: "Product details", data: product })
         }
         catch (err) {
@@ -162,6 +163,7 @@ module.exports = {
         try {
 
             let productId = req.params.productId;
+            // ------------------------- validations start -----------------------------------
             if (!productId) return res.status(400).send({ status: false, msg: "productId is required" })
             if (!mongoose.Types.ObjectId.isValid(productId)) return res.status(400).send({ status: false, msg: "Invalid bookId" })
             let data = req.body
@@ -195,8 +197,8 @@ module.exports = {
                 if (isFreeShipping != "true" && isFreeShipping != "false") return res.status(400).send({ status: false, msg: "its must be a boolean" })
                 obj["isFreeShipping"] = isFreeShipping
             }
-            let files = req.files[0]
-            if (files) {
+            if (req.files) {
+                let files = req.files[0]
                 if (!validImage(files)) return res.status(400).send({status: false, message: "Please provide a valid product Image"})
                 const productImage = await uploadFile(files)
                 obj["productImage"] = productImage
@@ -221,7 +223,7 @@ module.exports = {
                 obj["installments"] = installments
 
             }
-
+            // ------------------------- validations end ------------------------------------
             let updatebook = await productModel.findOneAndUpdate({ _id: productId,isDeleted:false}, { $set: obj }, { new: true })
             res.status(200).send({ status: true, message: 'Successfully Document Update', data: updatebook });
 
@@ -232,10 +234,12 @@ module.exports = {
     deleteProduct: async function (req, res) {
         try {
             let productId = req.params.productId
+            // ------------------------- validations start -----------------------------------
             if (!mongoose.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Invalid product Id" })
             let condition = { isDeleted: false, _id: productId }
             let product = await productModel.findOneAndUpdate(condition, { $set: { isDeleted: true, deletedAt: new Date() } })
             if (!product) return res.status(400).send({ status: false, message: "product not found" })
+            // ------------------------- validations end --------------------------------------
             return res.status(200).send({ status: true, message: "Product deleted" })
         }
         catch (err) {
