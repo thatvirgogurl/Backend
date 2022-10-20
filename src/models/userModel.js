@@ -11,7 +11,6 @@ const userSchema = new mongoose.Schema({
         required: "last name is required",
         trim: true
     },
-
     email: {
         type: String,
         trim: true,
@@ -23,7 +22,6 @@ const userSchema = new mongoose.Schema({
                 return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)
             }, message: "plese enter a valied email address", isAsync: false
         }
-
     },
     profileImage: {
         type: String,
@@ -33,7 +31,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         unique: true,
         required: true,
-
     },
     password: {
         type: String,
@@ -74,9 +71,7 @@ const userSchema = new mongoose.Schema({
             }
         }
     }
-}, { timestamps: true });
-
-
-
+}, 
+{ timestamps: true });
 
 module.exports = mongoose.model('User',userSchema) 

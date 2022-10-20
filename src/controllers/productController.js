@@ -1,44 +1,38 @@
 const productModel = require("../models/productModel")
 const { uploadFile } = require("./aws3")
 const mongoose = require('mongoose')
+const { isValid, isValidRequestBody, isValidName, isValidfild ,validImage} = require("../validator/validation")
 
 
-const { isValid, isValidRequestBody, isValidName, isValidfild ,isValidUrl} = require("../validator/validation")
 module.exports = {
     createproduct: async function (req, res) {
         try {
             const data = req.body
             const invalidrequest = {}
-            if (!isValidRequestBody(data)) invalidrequest.invalidBody = { status: false, message: " body cant't be empty Please enter some data." }
-
-            let { title, description, price, isFreeShipping, style, availableSizes, installments } = data
-
-            if (!isValid(title)) {
-                invalidrequest.invalidTitle = "Please provide a Title "
-            }
-            if (!(/^[a-zA-Z0-9.%$#@*&' ]{3,40}$/).test(title)) {
-                invalidrequest.invalidTitle = "Title length should not be greater than 20"
-            }else if(title) {
+            // ------------------------- validations start -----------------------------------
+            if(!isValidRequestBody(data)) invalidrequest.invalidBody = { status: false, message: " body cant't be empty Please enter some data." }
+            let { title, description, price, isFreeShipping, style, availableSizes, installments,currencyId} = data
+            if(!isValid(title)) {invalidrequest.invalidTitle = "Please provide a Title"}
+            if(!(/^[a-zA-Z0-9.%$#@*&' ]{3,40}$/).test(title)) {invalidrequest.invalidTitle = "Title length should not be greater than 20"}
+            else if(title){
                 title = title.trim()
                 const unique = await productModel.findOne({ title: title })
-                if (unique) {
-                    invalidrequest.invalidTitle = `[*${title}*]is  already exist`
-                }
+                if(unique) {invalidrequest.invalidTitle = `[*${title}*]is  already exist`}
             }
-            if (!isValid(description)) {
+            if(!isValid(description)) {
                 invalidrequest.description = "description is required"
             }else if(!(/^[a-zA-Z0-9.%$#@*& ']{10,80}$/).test(description)) {
                 invalidrequest.invalidDescription = "description length in between 10-40"
             }
-
             if (!(/^\d{0,8}[.]?\d{1,4}$/).test(price)) {
                 invalidrequest.invalidPrice = "price should be in no."
             }
-
-            if (isFreeShipping != "true" && isFreeShipping != "false") {
-                invalidrequest.invalidIsFreeShipping = "isFreeShipping should be a boolean value"
+            if(isFreeShipping){
+                if (isFreeShipping != "true" && isFreeShipping != "false") {
+                    invalidrequest.invalidIsFreeShipping = "isFreeShipping should be a boolean value"
+                }
             }
-
+            
             if (!isValidName.test(style)) {
                 invalidrequest.invalidStyle = {
                     status: false, msg: "Enter a valid style",
@@ -46,7 +40,7 @@ module.exports = {
                 }
             }
             if (availableSizes) {
-                availableSizes = availableSizes.trim().toUpperCase().split(' ')
+                availableSizes = availableSizes.trim().toUpperCase().split(',')
                 let arr = ["S", "XS", "M", "X", "L", "XXL", "XL"]
                 for (let i = 0; i < availableSizes.length; i++) {
                     if (availableSizes[i] == ",")
@@ -60,43 +54,53 @@ module.exports = {
             } else {
                 invalidrequest.invalidAvailableSizes = "availableSizes is required"
             }
-
-            if (!(/^([0]?[1-9]|1[0-2])$/).test(installments)) {
-                invalidrequest.invalidInstallments = "installments should be in no. And Between 1-12"
-            }
-
-            const obj = { title, description, price, isFreeShipping, style, availableSizes, installments }
-
-            let files = req.files
-            if (files && files.length > 0) {
-                const productImage = await uploadFile(files[0])
-                if (!isValidUrl.test(productImage)) {
-                    invalidrequest.invalidProductImage ="Product image should be an Image"
+            if(installments){
+                if (!(/^([0]?[1-9]|1[0-2])$/).test(installments)) {
+                    invalidrequest.invalidInstallments = "installments should be in no. And Between 1-12"
                 }
+            }
+            
+            if(!currencyId.match(/INR|USD/)){ 
+                invalidrequest.invalidcurrencyId = "currencyId support only INR or USD"
+            }                   
+            const obj = { title, description, price, isFreeShipping, style, availableSizes, installments,currencyId}
+
+            obj.currencyFormat = currencyId == 'INR' ? "₹" : "$"
+            let files = req.files[0]
+            if (files) {
+                if (!validImage(files)) return res.status(400).send({status: false, message: "Product Image should be an Image"})
+                const productImage = await uploadFile(files)
                 obj.productImage = productImage
             }
             else {
                 invalidrequest.invalidProductImage ="Please provide Product image"
             }
             if (isValidRequestBody(invalidrequest)) return res.status(400).send({ status: false, message: "invalidrequest", invalidrequest: invalidrequest })
-            obj.currencyFormat = "₹"
-            obj.currencyId = "INR"
-
-
+            // ------------------------- validations end -----------------------------------            
             const book = await productModel.create(obj)
             res.status(201).send({ status: true, message: "product successfully created", data: book })
         } catch (err) {
             res.status(500).send({ status: false, message: err.message })
         }
-
-
     },
+    
     getProducts: async function (req, res) {
         try {
             let data = req.query
             let { size, name, priceLessThan, priceGreaterThan, priceSort } = data
             let condition = { isDeleted: false }
             if (size) {
+                size = size.trim().toUpperCase().split(',')
+                let arr = ["S", "XS", "M", "X", "L", "XXL", "XL"]
+                for (let i = 0; i < size.length; i++) {
+                    if (size[i] == ",")
+                        continue
+                    else {
+                        if (!arr.includes(size[i])) {
+                            invalidrequest.invalidAvailableSizes = `availableSizes can contain only these value [${arr}]`
+                        }
+                    }
+                }
                 condition.availableSizes = size
             }
             if (name) {
@@ -144,10 +148,12 @@ module.exports = {
     getProductById: async function (req, res) {
         try {
             let productId = req.params.productId
+            // ------------------------- validations start -----------------------------------
             if (!mongoose.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Invalid product Id" })
             let condition = { isDeleted: false, _id: productId }
             let product = await productModel.findOne(condition)
             if (!product) return res.status(400).send({ status: false, message: "product not found" })
+            // ------------------------- validations end -----------------------------------
             return res.status(200).send({ status: true, message: "Product details", data: product })
         }
         catch (err) {
@@ -159,11 +165,12 @@ module.exports = {
         try {
 
             let productId = req.params.productId;
+            // ------------------------- validations start -----------------------------------
             if (!productId) return res.status(400).send({ status: false, msg: "productId is required" })
             if (!mongoose.Types.ObjectId.isValid(productId)) return res.status(400).send({ status: false, msg: "Invalid bookId" })
             let data = req.body
             let obj = {}
-            let { title, description, price, isFreeShipping, productImage, style, availableSizes, installments } = data
+            let { title, description, price, isFreeShipping, style, availableSizes, installments } = data
             if (Object.keys(data) == 0)
                 return res
                     .status(400)
@@ -192,14 +199,12 @@ module.exports = {
                 if (isFreeShipping != "true" && isFreeShipping != "false") return res.status(400).send({ status: false, msg: "its must be a boolean" })
                 obj["isFreeShipping"] = isFreeShipping
             }
-            let files = req.files
-            if (files && files.length > 0) {
-            const productImage = await uploadFile(files[0])
-            if (!isValidUrl.test(productImage)) return res.status(400).send({
-                status: false, message: "Product image should be an Image"
-            }) 
-            obj["productImage"] = productImage
-        }
+            if (req.files) {
+                let files = req.files[0]
+                if (!validImage(files)) return res.status(400).send({status: false, message: "Please provide a valid product Image"})
+                const productImage = await uploadFile(files)
+                obj["productImage"] = productImage
+            }
             if (style) {
                 if (!isValidfild(style)) return res.status(400).send({ status: false, msg: " it's must be string" })
                 obj["style"] = style
@@ -213,9 +218,6 @@ module.exports = {
                         return res.status(400).send({ status: false, message: "Available sizes shoule be [S, XS, M, X, L, XXL, XL]" })
                     }
                 }
-                // obj.availableSizes ={}
-                // //obj = { availableSizes: { $each: [availableSizes]}}
-                // obj.availableSizes.$each = availableSizes
                 obj.availableSizes = [...new Set(availableSizes)]
             }
             if (installments) {
@@ -223,8 +225,8 @@ module.exports = {
                 obj["installments"] = installments
 
             }
-
-            let updatebook = await productModel.findOneAndUpdate({ _id: productId }, { $set: obj }, { new: true })
+            // ------------------------- validations end ------------------------------------
+            let updatebook = await productModel.findOneAndUpdate({ _id: productId,isDeleted:false}, { $set: obj }, { new: true })
             res.status(200).send({ status: true, message: 'Successfully Document Update', data: updatebook });
 
         } catch (err) {
@@ -234,10 +236,12 @@ module.exports = {
     deleteProduct: async function (req, res) {
         try {
             let productId = req.params.productId
+            // ------------------------- validations start -----------------------------------
             if (!mongoose.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Invalid product Id" })
             let condition = { isDeleted: false, _id: productId }
             let product = await productModel.findOneAndUpdate(condition, { $set: { isDeleted: true, deletedAt: new Date() } })
             if (!product) return res.status(400).send({ status: false, message: "product not found" })
+            // ------------------------- validations end --------------------------------------
             return res.status(200).send({ status: true, message: "Product deleted" })
         }
         catch (err) {
