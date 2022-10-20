@@ -221,8 +221,11 @@ const updateUser = async function (req, res) {
             update.phone = phone
         }
         if (password) {
-            if (!isValidPassword(password)) return res.status(400).send({ status: false, message: 'Please provide valid password' })
-            let hash = await bcrypt.hash(password, 10);
+           
+         if (!isValidPassword(password)) return res.status(400).send({ status: false, message: 'Please provide valid password' })
+            
+         const salt = await bcrypt.genSalt(10)
+        const hash = await bcrypt.hash(password, salt);
             update.password = hash
         }
         if (address) {
