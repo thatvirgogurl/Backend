@@ -18,6 +18,7 @@ app.get('/', (req, res) => {
 
 const io = require('socket.io')(server)
 var users = {}
+/*socket io setup*/
 io.on('connection', (socket) => {//socket==all_users
     //console.log(socket.id)
     socket.on('new-user-joined', (userName) => {
