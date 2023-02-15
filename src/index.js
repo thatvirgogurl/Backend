@@ -1,5 +1,5 @@
 const express = require('express');
-const route = require('./routes/router.js');
+const route = require('./routers/router.js');
 const mongoose = require('mongoose');
 const app = express();
 //const bodyParser=require('body-parser')
@@ -9,8 +9,8 @@ const PORT = process.env.PORT || 3000
 app.use(express.json());
 
 app.use(multer().any())
-
-mongoose.connect("mongodb+srv://panigrahisameer_200:iklsSoxrtvpy4JOK@cluster0.kyd9m93.mongodb.net/group14Database", {
+mongoose.set('strictQuery', true);
+mongoose.connect("mongodb+srv://Monalisamishra:MDYlL3MKtGxQa59a@cluster0.7zrfpkj.mongodb.net/monalisaMishra_db", {
     useNewUrlParser: true
 })
     .then(() => console.log("MongoDb is connected"), err => console.log(err))

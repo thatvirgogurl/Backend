@@ -26,7 +26,7 @@ let authorization = async function (req, res, next) {
     try {
         let userId = req.params.userId
         // --------------- validation ------------------
-        if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "please provied a valid userId" })
+        if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "please provied a valid userId" })
         let user = await userModel.findById(userId)
         if (!user) return res.status(400).send({ status: false, message: "user is not exist" })
         // -----------------------------------------------
