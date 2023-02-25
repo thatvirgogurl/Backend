@@ -1,6 +1,10 @@
 const city = require("../models/city")
 // const fetch = require('node-fetch')
+const cities = require('country-state-city').City
 const mongoose = require('mongoose');
+//console.log(cities.getAllCities())
+//console.log(cities.getCitiesOfCountry("IN"));
+//console.log(cities.getCitiesOfState("UP"));
 const getCity = async function getcity(req, res) {
 
     let cityID = req.params.cityID;
