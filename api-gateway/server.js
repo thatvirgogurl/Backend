@@ -1,7 +1,7 @@
-// const express = require("express");
+
 const gateway = require("fast-gateway");
 
-const port = 9001;
+const port = 9000;
 const server = gateway({
     routes: [
         {
@@ -10,7 +10,7 @@ const server = gateway({
             hooks: {}
         },
         {
-            prefix: "/server1",
+            prefix: "/server2",
             target: "http://localhost:9002/",
             hooks: {}
         }
