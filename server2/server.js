@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const port = 9003;
 
 let axios = require("axios")
 const redis = require("redis")
@@ -31,7 +32,6 @@ redisClient.on("connect", async function () {
 const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
 const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
 
-const port = 9003;
 
 
 // Add a new city
@@ -46,9 +46,9 @@ app.post("/city", async function (req, res) {
         } else {
             axios.post("http://url.in/api/..", { body }).then((res) =>{
             SET_ASYNC(`${name}`, JSON.stringify(body))
-                return res.status(200).send({ status: true, msg: created })
+                return res.status(201).send({ status: true, msg: created })
         }).catch((err)=>
-             res.status(403).send({ status: true, msg: err }))
+             res.status(401).send({ status: true, msg: err }))
         }
     }catch(err){
         console.log(err)
@@ -72,9 +72,9 @@ app.post("/city/:cityID/transitProvders", async function (req, res) {
         } else {
             axios.post("http://url.in/api/..", { body }).then((res) => {
                 SET_ASYNC(`${transitProvdersId}`, JSON.stringify(body))
-                return res.status(200).send({ status: true, msg: created })
+                return res.status(201).send({ status: true, msg: created })
             }).catch((err) =>
-                res.status(403).send({ status: true, msg: err }))
+                res.status(401).send({ status: true, msg: err }))
         }
     } catch (err) {
         console.log(err)
@@ -84,14 +84,14 @@ app.post("/city/:cityID/transitProvders", async function (req, res) {
 })
 
 //GET /city/:cityID/transitProvders
-app.get(" /city/:cityID/transitProvders", async function (req, res) {
+app.get("/city/:cityID/transitProvders", async function (req, res) {
     let key = "AnIql3sAGJQ4dDNtqtLQdWywGB7YYSZz"
     let cityId = req.params.cityID;
     try {
         url = `http://dataservice.accuweather.com/locations/v1/topcities/${cityId}?apikey=${key}`
         let result = await fetch(url)
         const data = await result.json()
-        res.send({ msg: data })
+        res.status(401).send({ msg: data })
     }
     catch (err) {
         console.log(err)
