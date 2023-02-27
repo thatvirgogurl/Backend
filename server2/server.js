@@ -35,20 +35,60 @@ const port = 9003;
 
 
 // Add a new city
-// POST / city
+app.post("/city", async function (req, res) {
+    try{
+        let body = req.body;
+        let name=req.body.name;
+        let alredaypresent = await GET_ASYNC(`${name}`)
+        if (alredaypresent) {
+            const data = JSON.parse(alredaypresent)
+            return res.status(200).send({ status: true, msg: data })
+        } else {
+            axios.post("http://url.in/api/..", { body }).then((res) =>{
+            SET_ASYNC(`${name}`, JSON.stringify(body))
+                return res.status(200).send({ status: true, msg: created })
+        }).catch((err)=>
+             res.status(403).send({ status: true, msg: err }))
+        }
+    }catch(err){
+        console.log(err)
+        res.status(500).send({ msg: err.message })
+    }
+
+})
+//Add a new transit provider
+//POST / city /: cityID / transitProvders
 
 
 
-// Add a new transit provider
-// POST / city /: cityID / transitProvders
+app.post("/city/:cityID/transitProvders", async function (req, res) {
+    try {
+        let body = req.body;
+        let transitProvdersId = req.params.cityID;
+        let alredaypresent = await GET_ASYNC(`${transitProvdersId}`)
+        if (alredaypresent) {
+            const data = JSON.parse(alredaypresent)
+            return res.status(200).send({ status: true, msg: data })
+        } else {
+            axios.post("http://url.in/api/..", { body }).then((res) => {
+                SET_ASYNC(`${transitProvdersId}`, JSON.stringify(body))
+                return res.status(200).send({ status: true, msg: created })
+            }).catch((err) =>
+                res.status(403).send({ status: true, msg: err }))
+        }
+    } catch (err) {
+        console.log(err)
+        res.status(500).send({ msg: err.message })
+    }
 
+})
 
 //GET /city/:cityID/transitProvders
 app.get(" /city/:cityID/transitProvders", async function (req, res) {
     let key = "AnIql3sAGJQ4dDNtqtLQdWywGB7YYSZz"
     let cityId = req.params.cityID;
     try {
-        url = " "//`http://dataservice.accuweather.com/locations/v1/topcities/${limit}?apikey=${key}`
+        url = `http://dataservice.accuweather.com/locations/v1/topcities/${cityId}?apikey=${key}`
         let result = await fetch(url)
         const data = await result.json()
         res.send({ msg: data })
@@ -60,10 +100,10 @@ app.get(" /city/:cityID/transitProvders", async function (req, res) {
 
 });
 
-app.get("/", (req,res)=>{
+app.get("/", (req, res) => {
     res.send("server2 called");
 });
 
-app.listen(port, ()=>{
-    console.log("Listening at localhost "+ port);    
+app.listen(port, () => {
+    console.log("Listening at localhost " + port);
 })
