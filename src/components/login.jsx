@@ -1,7 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 const Login = () => {
+    const [user,setUser]=useState({
+        email:'',
+        password:""
+    })
+    //handel sinput
+    const handleChange=(event)=>{
+        let name=event.target.name
+        let value = event.target.value
+        setUser({...user,[name]:value})
+
+    }
+    //handel sumbit
+    const handelSubmit = async (event)=>{
+        event.preventDefault();
+        const {email,password}=user;
+        try {
+            const res=await fetch('/login',{
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email, password
+                })
+            })
+            if(res.status===400||!res){
+                window.alert('Invalid credential')
+
+
+            }else{
+                window.alert('LOgged in succesfull')
+                window.location.reload();
+            }
+        } catch (e) {
+            
+        }
+    }
     return (
         <div>
             <div className="container shadow my-5">
@@ -16,14 +53,14 @@ const Login = () => {
                         <h1 className="display-6 fw-bolder mb-5">
                             LOGIN
                         </h1>
-                        <form>
+                        <form onSubmit={handelSubmit}>
                             <div class="mb-3">
                                 <label for="exampleInputEmail1" class="form-label">Email address</label>
-                                <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" />
+                                <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name='email' value={user.email} onChange={handleChange} />
                                 <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
                             </div>
                             <div class="mb-3">
-                                <label for="exampleInputPassword1" class="form-label">Password</label>
+                                <label for="exampleInputPassword1" class="form-label" name='password' value={user.password} onChange={handleChange}>Password</label>
                                 <input type="password" class="form-control" id="exampleInputPassword1" />
                             </div>
                             <div class="mb-3 form-check">
