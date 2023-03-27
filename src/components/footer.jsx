@@ -4,11 +4,11 @@ import React from 'react';
 export default function Footer() {
     return (
         <div>
-            <footer className='footer text-white'>
+            <footer className='footer text-grey'>
                 <div className='container'>
                     <div className='row'>
-                        <div className='col-md-3 col-sm-6'>
-                            <h4>NewLetter</h4>
+                        <div className='col-md-3 col-sm-6 '>
+                            <h4 className='text-black'>NewLetter</h4>
                             <p>Subscribe us For Latest Update</p>
                             <div className='form-wrap' id='mc_embed_signup'>
                                 <form target='_blank' action='#' method='get' className='form-inline'>
@@ -21,7 +21,7 @@ export default function Footer() {
                                 </form>
                             </div>
                         </div>
-                        <div className='col-md-3'>
+                        <div className='col-md-3 text-black'>
                             <h4> ABOUT US</h4>
                             <ul className='list-unstyled'>
                                 <li><a href='#'>LEADERSHIP</a></li>
