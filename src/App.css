@@ -4,3 +4,35 @@
   background: linear-gradient(90deg,rgb(0, 101, 219) 50%,rgb(0, 212, 255,1) 100%);
   min-height: 500px;
 }
+/*Home*/
+.card{
+  transition: all 0.5s ease;
+}
+.card:hover{
+  cursor: pointer;
+  box-shadow: 0 .5rem 1rem rgba(10, 2, 2, 0.15);
+}
+/*footer*/
+
+.footer{
+  background-color: #24262b;
+}
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.footer-links li {
+  width: 25%;
+  text-align: right;
+}
+.footer a {
+  color: #a995e9;
+  text-decoration: none;
+  margin-right: 10px;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
